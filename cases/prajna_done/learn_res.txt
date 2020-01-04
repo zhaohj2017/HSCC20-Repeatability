@@ -1,0 +1,1370 @@
+---------------------------first try----------------------------------------------------------------------
+restart: 0 epoch: 187 batch: 4095 batch_loss: 0.0 batch_gradient: 0.2983132193544842 epoch_loss: 0.0 
+
+The last epoch: 187
+Success! The nn model is:
+
+tensor([[ 0.1712,  0.5321],
+        [ 0.4019,  0.2992],
+        [-0.1816,  0.0827],
+        [-0.3460,  0.6876],
+        [ 0.1481, -0.0490],
+        [ 0.1531, -0.7082],
+        [ 0.0317, -0.3710],
+        [ 0.4091, -1.3192],
+        [ 0.9138, -0.0660],
+        [-0.0169,  0.7242],
+        [ 0.5606,  0.1936],
+        [ 0.5019, -0.5377],
+        [-0.2130,  0.5580],
+        [ 0.5499,  0.5429],
+        [-0.3278, -0.1040],
+        [ 0.5083,  0.3651],
+        [-0.9528,  0.0995],
+        [-0.5902, -0.1224],
+        [-0.4193,  0.4388],
+        [-0.4300, -0.5219]])
+tensor([ 0.1370, -0.4448,  0.5700,  0.1289, -0.2520,  0.3496,  0.6030,  0.2131,
+        -0.4962,  0.1112, -0.5896, -0.6358,  0.9147,  1.0360,  0.1963,  0.0027,
+        -0.7425, -0.8934,  0.1341, -0.1585])
+tensor([[ 0.3258, -0.2142, -0.1953, -0.3052, -0.0237,  0.5007, -0.9126,  0.1808,
+         -0.5547,  0.4046, -0.1018,  1.0258,  0.6174, -0.5588, -0.6782,  0.6134,
+          0.1592, -0.3948, -0.1881,  0.3240]])
+tensor([0.3886])
+restart: 0
+
+Data generation totally cost: 0.34393739700317383
+Training totally cost: 1539.3027226924896
+
+--------------------parameters:-----------------
+import torch
+import numpy as np
+from functools import reduce
+from operator import mul
+
+
+############################################
+# set default data type to double; for GPU
+# training use float
+############################################
+torch.set_default_dtype(torch.float64)
+torch.set_default_tensor_type(torch.DoubleTensor)
+# torch.set_default_dtype(torch.float32)
+# torch.set_default_tensor_type(torch.FloatTensor)
+
+
+# for output
+VERBOSE = 1
+
+
+############################################
+# set the network architecture
+############################################
+D_H = 20 # the number of neurons of each hidden layer
+N_H = 1 # then number of hidden layers
+
+
+############################################
+# for activation function definition
+############################################
+BENT_DEG = 0.0001
+
+
+############################################
+# set loss function definition
+############################################
+TOL_INIT = 0.0
+TOL_SAFE = 0.0
+TOL_BOUNDARY = 0.05
+TOL_LIE = 0.001
+TOL_NORM_LIE = 0.0
+WEIGHT_LIE = 1
+WEIGHT_NORM_LIE = 0
+
+DECAY_LIE = 1
+DECAY_INIT = 1
+DECAY_UNSAFE = 1
+
+
+############################################
+# for optimization method tunning: LBFGS
+############################################
+LBFGS_NUM_ITER = 1
+LBFGS_TOL_GRAD = 1e-05
+LBFGS_TOL_CHANGE = 1e-09
+LBFGS_NUM_HISTORY = 100
+LBFGS_LINE_SEARCH_FUN = None
+
+
+TOL_OPTIMIZER_RESET = -1
+SHRINK_RATE_FACTOR = 10
+FRACTION_INSTABLE_BATCH = 10000000000000000000
+NUM_BATCH_ITR = 3
+
+
+############################################
+# set the training super parameters
+############################################
+EPOCHS = 500
+
+
+############################################
+# my own scheduling policy: 
+# rate = alpha / (1 + beta * epoch^gamma)
+############################################
+ALPHA = 0.01 # initial learning rate
+BETA = 0 # if beta equals 0 then constant rate = alpha
+GAMMA = 0 # when beta is nonzero, larger gamma gives faster drop of rate
+
+
+############################################
+# training termination flags
+############################################
+LOSS_OPT_FLAG = 1e-16
+TOL_MAX_GRAD = 6
+
+
+############################################
+# for training set generation
+############################################
+TOL_DATA_GEN = 1e-16
+
+DATA_EXP_I = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_I = np.power(2, DATA_EXP_I) # the number of samples for each dimension of domain
+BLOCK_EXP_I = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_I = np.power(2, BLOCK_EXP_I) # number of batches for each dimension
+    # for this example, it is important to set the size of initial and unsafe not too large
+    # compared with the size of each batch of domain-lie
+DATA_EXP_U = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_U = np.power(2, DATA_EXP_U) # the number of samples for each dimension of domain
+BLOCK_EXP_U = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_U = np.power(2, BLOCK_EXP_U) # number of batches for each dimension
+
+DATA_EXP_D = np.array([8, 8]) # for sampling from initial; length = prob.DIM
+DATA_LEN_D = np.power(2, DATA_EXP_D) # the number of samples for each dimension of domain
+BLOCK_EXP_D = np.array([6, 6]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_D = np.power(2, BLOCK_EXP_D) # number of batches for each dimension
+
+
+############################################
+# number of mini_batches
+############################################
+BATCHES_I = reduce(mul, list(BLOCK_LEN_I))
+BATCHES_U = reduce(mul, list(BLOCK_LEN_U))
+BATCHES_D = reduce(mul, list(BLOCK_LEN_D))
+
+BATCHES = max(BATCHES_I, BATCHES_U, BATCHES_D)
+
+############################################
+# for plotting
+############################################
+PLOT_EXP_B = np.array([8, 8]) # sampling from domain for plotting the boundary of barrier using contour plot
+PLOT_LEN_B = np.power(2, PLOT_EXP_B) # the number of samples for each dimension of domain, usually larger than superp.DATA_LEN_D
+
+PLOT_EXP_V = np.array([7, 7]) # sampling from domain for plotting the vector field
+PLOT_LEN_V = np.power(2, PLOT_EXP_V) # the number of samples for each dimension of domain, usually equal to superp.DATA_LEN_D
+
+PLOT_EXP_P = np.array([7, 7]) # sampling from domain for plotting the scattering sampling points, should be equal to superp.DATA_LEN_D
+PLOT_LEN_P = np.power(2, PLOT_EXP_P) # the number of samples for each dimension of domain
+
+PLOT_VEC_SCALE = None
+
+
+---------------------fine tune 1 from 0----------------------------
+restart: 0 epoch: 18 batch: 4095 batch_loss: 0.0 batch_gradient: 0.4237576831923798 epoch_loss: 0.0 
+
+The last epoch: 18
+Success! The nn model is:
+
+tensor([[ 0.1277,  0.5460],
+        [ 0.4275,  0.2984],
+        [-0.1781,  0.0861],
+        [-0.3777,  0.6821],
+        [ 0.1487, -0.0492],
+        [ 0.2165, -0.6917],
+        [ 0.0377, -0.3608],
+        [ 0.4259, -1.3200],
+        [ 0.9134, -0.0622],
+        [-0.0703,  0.7373],
+        [ 0.5704,  0.1943],
+        [ 0.4654, -0.5360],
+        [-0.2125,  0.5540],
+        [ 0.5418,  0.5397],
+        [-0.3226, -0.0911],
+        [ 0.4989,  0.3977],
+        [-0.9458,  0.0973],
+        [-0.5623, -0.1213],
+        [-0.4213,  0.4477],
+        [-0.4338, -0.5308]])
+tensor([ 0.1564, -0.4252,  0.5667,  0.1433, -0.2516,  0.3563,  0.6003,  0.1762,
+        -0.5261,  0.1421, -0.5820, -0.6501,  0.9099,  1.0421,  0.2292, -0.0202,
+        -0.7409, -0.9109,  0.1327, -0.1290])
+tensor([[ 0.3370, -0.2225, -0.1933, -0.3325, -0.0240,  0.5027, -0.8978,  0.1992,
+         -0.5802,  0.4411, -0.1130,  1.0158,  0.6040, -0.5567, -0.6774,  0.6259,
+          0.1057, -0.3936, -0.2128,  0.3336]])
+tensor([0.3876])
+restart: 0
+
+Data generation totally cost: 0.4402806758880615
+Training totally cost: 131.61739134788513
+
+-------------------parameters:----------------------
+import torch
+import numpy as np
+from functools import reduce
+from operator import mul
+
+
+############################################
+# set default data type to double; for GPU
+# training use float
+############################################
+torch.set_default_dtype(torch.float64)
+torch.set_default_tensor_type(torch.DoubleTensor)
+# torch.set_default_dtype(torch.float32)
+# torch.set_default_tensor_type(torch.FloatTensor)
+
+
+# for output
+VERBOSE = 1
+
+
+############################################
+# set the network architecture
+############################################
+D_H = 20 # the number of neurons of each hidden layer
+N_H = 1 # then number of hidden layers
+
+
+############################################
+# for activation function definition
+############################################
+BENT_DEG = 0.0001
+
+
+############################################
+# set loss function definition
+############################################
+TOL_INIT = 0.02
+TOL_SAFE = 0.02
+TOL_BOUNDARY = 0.05
+TOL_LIE = 0.005
+TOL_NORM_LIE = 0.0
+WEIGHT_LIE = 1
+WEIGHT_NORM_LIE = 0
+
+DECAY_LIE = 1
+DECAY_INIT = 1
+DECAY_UNSAFE = 1
+
+
+############################################
+# for optimization method tunning: LBFGS
+############################################
+LBFGS_NUM_ITER = 1
+LBFGS_TOL_GRAD = 1e-05
+LBFGS_TOL_CHANGE = 1e-09
+LBFGS_NUM_HISTORY = 100
+LBFGS_LINE_SEARCH_FUN = None
+
+
+TOL_OPTIMIZER_RESET = -1
+SHRINK_RATE_FACTOR = 10
+FRACTION_INSTABLE_BATCH = 10000000000000000000
+NUM_BATCH_ITR = 3
+
+
+############################################
+# set the training super parameters
+############################################
+EPOCHS = 500
+
+
+############################################
+# my own scheduling policy: 
+# rate = alpha / (1 + beta * epoch^gamma)
+############################################
+ALPHA = 0.01 # initial learning rate
+BETA = 0 # if beta equals 0 then constant rate = alpha
+GAMMA = 0 # when beta is nonzero, larger gamma gives faster drop of rate
+
+
+############################################
+# training termination flags
+############################################
+LOSS_OPT_FLAG = 1e-16
+TOL_MAX_GRAD = 6
+
+
+############################################
+# for training set generation
+############################################
+TOL_DATA_GEN = 1e-16
+
+DATA_EXP_I = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_I = np.power(2, DATA_EXP_I) # the number of samples for each dimension of domain
+BLOCK_EXP_I = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_I = np.power(2, BLOCK_EXP_I) # number of batches for each dimension
+    # for this example, it is important to set the size of initial and unsafe not too large
+    # compared with the size of each batch of domain-lie
+DATA_EXP_U = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_U = np.power(2, DATA_EXP_U) # the number of samples for each dimension of domain
+BLOCK_EXP_U = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_U = np.power(2, BLOCK_EXP_U) # number of batches for each dimension
+
+DATA_EXP_D = np.array([8, 8]) # for sampling from initial; length = prob.DIM
+DATA_LEN_D = np.power(2, DATA_EXP_D) # the number of samples for each dimension of domain
+BLOCK_EXP_D = np.array([6, 6]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_D = np.power(2, BLOCK_EXP_D) # number of batches for each dimension
+
+
+############################################
+# number of mini_batches
+############################################
+BATCHES_I = reduce(mul, list(BLOCK_LEN_I))
+BATCHES_U = reduce(mul, list(BLOCK_LEN_U))
+BATCHES_D = reduce(mul, list(BLOCK_LEN_D))
+
+BATCHES = max(BATCHES_I, BATCHES_U, BATCHES_D)
+
+############################################
+# for plotting
+############################################
+PLOT_EXP_B = np.array([8, 8]) # sampling from domain for plotting the boundary of barrier using contour plot
+PLOT_LEN_B = np.power(2, PLOT_EXP_B) # the number of samples for each dimension of domain, usually larger than superp.DATA_LEN_D
+
+PLOT_EXP_V = np.array([7, 7]) # sampling from domain for plotting the vector field
+PLOT_LEN_V = np.power(2, PLOT_EXP_V) # the number of samples for each dimension of domain, usually equal to superp.DATA_LEN_D
+
+PLOT_EXP_P = np.array([7, 7]) # sampling from domain for plotting the scattering sampling points, should be equal to superp.DATA_LEN_D
+PLOT_LEN_P = np.power(2, PLOT_EXP_P) # the number of samples for each dimension of domain
+
+PLOT_VEC_SCALE = None
+
+-----------------------fine tune 2 from 1--------------------------
+restart: 0 epoch: 3 batch: 4095 batch_loss: 0.0 batch_gradient: 0.6497895208246711 epoch_loss: 0.0 
+
+The last epoch: 3
+Success! The nn model is:
+
+tensor([[ 0.1270,  0.5466],
+        [ 0.4275,  0.2984],
+        [-0.1782,  0.0856],
+        [-0.3779,  0.6812],
+        [ 0.1487, -0.0492],
+        [ 0.2176, -0.6910],
+        [ 0.0371, -0.3633],
+        [ 0.4264, -1.3197],
+        [ 0.9134, -0.0622],
+        [-0.0712,  0.7381],
+        [ 0.5704,  0.1943],
+        [ 0.4654, -0.5360],
+        [-0.2121,  0.5557],
+        [ 0.5415,  0.5382],
+        [-0.3231, -0.0930],
+        [ 0.4986,  0.3980],
+        [-0.9456,  0.0974],
+        [-0.5623, -0.1213],
+        [-0.4214,  0.4471],
+        [-0.4336, -0.5301]])
+tensor([ 0.1567, -0.4252,  0.5669,  0.1436, -0.2516,  0.3545,  0.6012,  0.1757,
+        -0.5261,  0.1425, -0.5820, -0.6501,  0.9093,  1.0426,  0.2299, -0.0210,
+        -0.7411, -0.9109,  0.1329, -0.1289])
+tensor([[ 0.3379, -0.2225, -0.1938, -0.3310, -0.0240,  0.5010, -0.8994,  0.1977,
+         -0.5802,  0.4427, -0.1130,  1.0158,  0.6045, -0.5559, -0.6781,  0.6259,
+          0.1052, -0.3936, -0.2120,  0.3322]])
+tensor([0.3866])
+restart: 0
+
+Data generation totally cost: 0.4963076114654541
+Training totally cost: 34.94785523414612
+
+------------------parameters:------------------------
+import torch
+import numpy as np
+from functools import reduce
+from operator import mul
+
+
+############################################
+# set default data type to double; for GPU
+# training use float
+############################################
+torch.set_default_dtype(torch.float64)
+torch.set_default_tensor_type(torch.DoubleTensor)
+# torch.set_default_dtype(torch.float32)
+# torch.set_default_tensor_type(torch.FloatTensor)
+
+
+# for output
+VERBOSE = 1
+
+
+############################################
+# set the network architecture
+############################################
+D_H = 20 # the number of neurons of each hidden layer
+N_H = 1 # then number of hidden layers
+
+
+############################################
+# for activation function definition
+############################################
+BENT_DEG = 0.0001
+
+
+############################################
+# set loss function definition
+############################################
+TOL_INIT = 0.02
+TOL_SAFE = 0.02
+TOL_BOUNDARY = 0.05
+TOL_LIE = 0.01
+TOL_NORM_LIE = 0.0
+WEIGHT_LIE = 1
+WEIGHT_NORM_LIE = 0
+
+DECAY_LIE = 1
+DECAY_INIT = 1
+DECAY_UNSAFE = 1
+
+
+############################################
+# for optimization method tunning: LBFGS
+############################################
+LBFGS_NUM_ITER = 1
+LBFGS_TOL_GRAD = 1e-05
+LBFGS_TOL_CHANGE = 1e-09
+LBFGS_NUM_HISTORY = 100
+LBFGS_LINE_SEARCH_FUN = None
+
+
+TOL_OPTIMIZER_RESET = -1
+SHRINK_RATE_FACTOR = 10
+FRACTION_INSTABLE_BATCH = 10000000000000000000
+NUM_BATCH_ITR = 3
+
+
+############################################
+# set the training super parameters
+############################################
+EPOCHS = 500
+
+
+############################################
+# my own scheduling policy: 
+# rate = alpha / (1 + beta * epoch^gamma)
+############################################
+ALPHA = 0.01 # initial learning rate
+BETA = 0 # if beta equals 0 then constant rate = alpha
+GAMMA = 0 # when beta is nonzero, larger gamma gives faster drop of rate
+
+
+############################################
+# training termination flags
+############################################
+LOSS_OPT_FLAG = 1e-16
+TOL_MAX_GRAD = 6
+
+
+############################################
+# for training set generation
+############################################
+TOL_DATA_GEN = 1e-16
+
+DATA_EXP_I = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_I = np.power(2, DATA_EXP_I) # the number of samples for each dimension of domain
+BLOCK_EXP_I = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_I = np.power(2, BLOCK_EXP_I) # number of batches for each dimension
+    # for this example, it is important to set the size of initial and unsafe not too large
+    # compared with the size of each batch of domain-lie
+DATA_EXP_U = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_U = np.power(2, DATA_EXP_U) # the number of samples for each dimension of domain
+BLOCK_EXP_U = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_U = np.power(2, BLOCK_EXP_U) # number of batches for each dimension
+
+DATA_EXP_D = np.array([8, 8]) # for sampling from initial; length = prob.DIM
+DATA_LEN_D = np.power(2, DATA_EXP_D) # the number of samples for each dimension of domain
+BLOCK_EXP_D = np.array([6, 6]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_D = np.power(2, BLOCK_EXP_D) # number of batches for each dimension
+
+
+############################################
+# number of mini_batches
+############################################
+BATCHES_I = reduce(mul, list(BLOCK_LEN_I))
+BATCHES_U = reduce(mul, list(BLOCK_LEN_U))
+BATCHES_D = reduce(mul, list(BLOCK_LEN_D))
+
+BATCHES = max(BATCHES_I, BATCHES_U, BATCHES_D)
+
+############################################
+# for plotting
+############################################
+PLOT_EXP_B = np.array([8, 8]) # sampling from domain for plotting the boundary of barrier using contour plot
+PLOT_LEN_B = np.power(2, PLOT_EXP_B) # the number of samples for each dimension of domain, usually larger than superp.DATA_LEN_D
+
+PLOT_EXP_V = np.array([7, 7]) # sampling from domain for plotting the vector field
+PLOT_LEN_V = np.power(2, PLOT_EXP_V) # the number of samples for each dimension of domain, usually equal to superp.DATA_LEN_D
+
+PLOT_EXP_P = np.array([7, 7]) # sampling from domain for plotting the scattering sampling points, should be equal to superp.DATA_LEN_D
+PLOT_LEN_P = np.power(2, PLOT_EXP_P) # the number of samples for each dimension of domain
+
+PLOT_VEC_SCALE = None
+
+---------------------------fine tune 3 from 2-----------------------------
+restart: 0 epoch: 4 batch: 4095 batch_loss: 0.0 batch_gradient: 0.16878367085509832 epoch_loss: 0.0 
+
+The last epoch: 4
+Success! The nn model is:
+
+tensor([[ 0.1246,  0.5466],
+        [ 0.4275,  0.2984],
+        [-0.1778,  0.0856],
+        [-0.3772,  0.6812],
+        [ 0.1487, -0.0492],
+        [ 0.2204, -0.6911],
+        [ 0.0390, -0.3631],
+        [ 0.4276, -1.3197],
+        [ 0.9134, -0.0622],
+        [-0.0744,  0.7381],
+        [ 0.5704,  0.1943],
+        [ 0.4654, -0.5360],
+        [-0.2133,  0.5556],
+        [ 0.5429,  0.5384],
+        [-0.3217, -0.0929],
+        [ 0.4989,  0.3979],
+        [-0.9458,  0.0973],
+        [-0.5623, -0.1213],
+        [-0.4209,  0.4471],
+        [-0.4361, -0.5276]])
+tensor([ 0.1574, -0.4252,  0.5669,  0.1436, -0.2516,  0.3538,  0.6012,  0.1757,
+        -0.5261,  0.1434, -0.5820, -0.6501,  0.9093,  1.0424,  0.2299, -0.0207,
+        -0.7413, -0.9109,  0.1330, -0.1252])
+tensor([[ 0.3372, -0.2225, -0.1934, -0.3303, -0.0240,  0.5018, -0.8993,  0.2000,
+         -0.5802,  0.4434, -0.1130,  1.0158,  0.6048, -0.5571, -0.6774,  0.6261,
+          0.1082, -0.3936, -0.2112,  0.3305]])
+tensor([0.3866])
+restart: 0
+
+Data generation totally cost: 0.4935181140899658
+Training totally cost: 42.98231267929077
+
+-------------parameters:--------------------
+import torch
+import numpy as np
+from functools import reduce
+from operator import mul
+
+
+############################################
+# set default data type to double; for GPU
+# training use float
+############################################
+torch.set_default_dtype(torch.float64)
+torch.set_default_tensor_type(torch.DoubleTensor)
+# torch.set_default_dtype(torch.float32)
+# torch.set_default_tensor_type(torch.FloatTensor)
+
+
+# for output
+VERBOSE = 1
+
+
+############################################
+# set the network architecture
+############################################
+D_H = 20 # the number of neurons of each hidden layer
+N_H = 1 # then number of hidden layers
+
+
+############################################
+# for activation function definition
+############################################
+BENT_DEG = 0.0001
+
+
+############################################
+# set loss function definition
+############################################
+TOL_INIT = 0.02
+TOL_SAFE = 0.02
+TOL_BOUNDARY = 0.05
+TOL_LIE = 0.012
+TOL_NORM_LIE = 0.0
+WEIGHT_LIE = 1
+WEIGHT_NORM_LIE = 0
+
+DECAY_LIE = 1
+DECAY_INIT = 1
+DECAY_UNSAFE = 1
+
+
+############################################
+# for optimization method tunning: LBFGS
+############################################
+LBFGS_NUM_ITER = 1
+LBFGS_TOL_GRAD = 1e-05
+LBFGS_TOL_CHANGE = 1e-09
+LBFGS_NUM_HISTORY = 100
+LBFGS_LINE_SEARCH_FUN = None
+
+
+TOL_OPTIMIZER_RESET = -1
+SHRINK_RATE_FACTOR = 10
+FRACTION_INSTABLE_BATCH = 10000000000000000000
+NUM_BATCH_ITR = 3
+
+
+############################################
+# set the training super parameters
+############################################
+EPOCHS = 500
+
+
+############################################
+# my own scheduling policy: 
+# rate = alpha / (1 + beta * epoch^gamma)
+############################################
+ALPHA = 0.01 # initial learning rate
+BETA = 0 # if beta equals 0 then constant rate = alpha
+GAMMA = 0 # when beta is nonzero, larger gamma gives faster drop of rate
+
+
+############################################
+# training termination flags
+############################################
+LOSS_OPT_FLAG = 1e-16
+TOL_MAX_GRAD = 6
+
+
+############################################
+# for training set generation
+############################################
+TOL_DATA_GEN = 1e-16
+
+DATA_EXP_I = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_I = np.power(2, DATA_EXP_I) # the number of samples for each dimension of domain
+BLOCK_EXP_I = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_I = np.power(2, BLOCK_EXP_I) # number of batches for each dimension
+    # for this example, it is important to set the size of initial and unsafe not too large
+    # compared with the size of each batch of domain-lie
+DATA_EXP_U = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_U = np.power(2, DATA_EXP_U) # the number of samples for each dimension of domain
+BLOCK_EXP_U = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_U = np.power(2, BLOCK_EXP_U) # number of batches for each dimension
+
+DATA_EXP_D = np.array([8, 8]) # for sampling from initial; length = prob.DIM
+DATA_LEN_D = np.power(2, DATA_EXP_D) # the number of samples for each dimension of domain
+BLOCK_EXP_D = np.array([6, 6]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_D = np.power(2, BLOCK_EXP_D) # number of batches for each dimension
+
+
+############################################
+# number of mini_batches
+############################################
+BATCHES_I = reduce(mul, list(BLOCK_LEN_I))
+BATCHES_U = reduce(mul, list(BLOCK_LEN_U))
+BATCHES_D = reduce(mul, list(BLOCK_LEN_D))
+
+BATCHES = max(BATCHES_I, BATCHES_U, BATCHES_D)
+
+############################################
+# for plotting
+############################################
+PLOT_EXP_B = np.array([8, 8]) # sampling from domain for plotting the boundary of barrier using contour plot
+PLOT_LEN_B = np.power(2, PLOT_EXP_B) # the number of samples for each dimension of domain, usually larger than superp.DATA_LEN_D
+
+PLOT_EXP_V = np.array([7, 7]) # sampling from domain for plotting the vector field
+PLOT_LEN_V = np.power(2, PLOT_EXP_V) # the number of samples for each dimension of domain, usually equal to superp.DATA_LEN_D
+
+PLOT_EXP_P = np.array([7, 7]) # sampling from domain for plotting the scattering sampling points, should be equal to superp.DATA_LEN_D
+PLOT_LEN_P = np.power(2, PLOT_EXP_P) # the number of samples for each dimension of domain
+
+PLOT_VEC_SCALE = None
+
+--------------------fine tune 4 from 3------------------------
+
+restart: 0 epoch: 5 batch: 4095 batch_loss: 0.0 batch_gradient: 0.4352737667894126 epoch_loss: 0.0 
+
+The last epoch: 5
+Success! The nn model is:
+
+tensor([[ 0.1150,  0.5465],
+        [ 0.4275,  0.2984],
+        [-0.1775,  0.0863],
+        [-0.3762,  0.6821],
+        [ 0.1487, -0.0492],
+        [ 0.2380, -0.6836],
+        [ 0.0387, -0.3605],
+        [ 0.4335, -1.3176],
+        [ 0.9111, -0.0625],
+        [-0.0880,  0.7377],
+        [ 0.5704,  0.1943],
+        [ 0.4654, -0.5360],
+        [-0.2122,  0.5541],
+        [ 0.5451,  0.5408],
+        [-0.3194, -0.0905],
+        [ 0.5006,  0.4007],
+        [-0.9437,  0.0942],
+        [-0.5586, -0.1215],
+        [-0.4199,  0.4478],
+        [-0.4310, -0.5372]])
+tensor([ 0.1604, -0.4252,  0.5667,  0.1456, -0.2516,  0.3577,  0.6017,  0.1716,
+        -0.5290,  0.1481, -0.5820, -0.6501,  0.9082,  1.0409,  0.2333, -0.0242,
+        -0.7445, -0.9134,  0.1340, -0.1339])
+tensor([[ 0.3351, -0.2225, -0.1940, -0.3317, -0.0240,  0.5022, -0.8974,  0.1971,
+         -0.5793,  0.4465, -0.1130,  1.0158,  0.6012, -0.5583, -0.6764,  0.6299,
+          0.1109, -0.3937, -0.2118,  0.3426]])
+tensor([0.3856])
+restart: 0
+
+Data generation totally cost: 0.4688599109649658
+Training totally cost: 51.16158676147461
+
+
+
+import torch
+import numpy as np
+from functools import reduce
+from operator import mul
+
+
+############################################
+# set default data type to double; for GPU
+# training use float
+############################################
+torch.set_default_dtype(torch.float64)
+torch.set_default_tensor_type(torch.DoubleTensor)
+# torch.set_default_dtype(torch.float32)
+# torch.set_default_tensor_type(torch.FloatTensor)
+
+
+# for output
+VERBOSE = 1
+
+
+############################################
+# set the network architecture
+############################################
+D_H = 20 # the number of neurons of each hidden layer
+N_H = 1 # then number of hidden layers
+
+
+############################################
+# for activation function definition
+############################################
+BENT_DEG = 0.0001
+
+
+############################################
+# set loss function definition
+############################################
+TOL_INIT = 0.01
+TOL_SAFE = 0.01
+TOL_BOUNDARY = 0.05
+TOL_LIE = 0.015
+TOL_NORM_LIE = 0.0
+WEIGHT_LIE = 1
+WEIGHT_NORM_LIE = 0
+
+DECAY_LIE = 1
+DECAY_INIT = 1
+DECAY_UNSAFE = 1
+
+
+############################################
+# for optimization method tunning: LBFGS
+############################################
+LBFGS_NUM_ITER = 1
+LBFGS_TOL_GRAD = 1e-05
+LBFGS_TOL_CHANGE = 1e-09
+LBFGS_NUM_HISTORY = 100
+LBFGS_LINE_SEARCH_FUN = None
+
+
+TOL_OPTIMIZER_RESET = -1
+SHRINK_RATE_FACTOR = 10
+FRACTION_INSTABLE_BATCH = 10000000000000000000
+NUM_BATCH_ITR = 3
+
+
+############################################
+# set the training super parameters
+############################################
+EPOCHS = 500
+
+
+############################################
+# my own scheduling policy: 
+# rate = alpha / (1 + beta * epoch^gamma)
+############################################
+ALPHA = 0.01 # initial learning rate
+BETA = 0 # if beta equals 0 then constant rate = alpha
+GAMMA = 0 # when beta is nonzero, larger gamma gives faster drop of rate
+
+
+############################################
+# training termination flags
+############################################
+LOSS_OPT_FLAG = 1e-16
+TOL_MAX_GRAD = 6
+
+
+############################################
+# for training set generation
+############################################
+TOL_DATA_GEN = 1e-16
+
+DATA_EXP_I = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_I = np.power(2, DATA_EXP_I) # the number of samples for each dimension of domain
+BLOCK_EXP_I = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_I = np.power(2, BLOCK_EXP_I) # number of batches for each dimension
+    # for this example, it is important to set the size of initial and unsafe not too large
+    # compared with the size of each batch of domain-lie
+DATA_EXP_U = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_U = np.power(2, DATA_EXP_U) # the number of samples for each dimension of domain
+BLOCK_EXP_U = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_U = np.power(2, BLOCK_EXP_U) # number of batches for each dimension
+
+DATA_EXP_D = np.array([8, 8]) # for sampling from initial; length = prob.DIM
+DATA_LEN_D = np.power(2, DATA_EXP_D) # the number of samples for each dimension of domain
+BLOCK_EXP_D = np.array([6, 6]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_D = np.power(2, BLOCK_EXP_D) # number of batches for each dimension
+
+
+############################################
+# number of mini_batches
+############################################
+BATCHES_I = reduce(mul, list(BLOCK_LEN_I))
+BATCHES_U = reduce(mul, list(BLOCK_LEN_U))
+BATCHES_D = reduce(mul, list(BLOCK_LEN_D))
+
+BATCHES = max(BATCHES_I, BATCHES_U, BATCHES_D)
+
+############################################
+# for plotting
+############################################
+PLOT_EXP_B = np.array([8, 8]) # sampling from domain for plotting the boundary of barrier using contour plot
+PLOT_LEN_B = np.power(2, PLOT_EXP_B) # the number of samples for each dimension of domain, usually larger than superp.DATA_LEN_D
+
+PLOT_EXP_V = np.array([7, 7]) # sampling from domain for plotting the vector field
+PLOT_LEN_V = np.power(2, PLOT_EXP_V) # the number of samples for each dimension of domain, usually equal to superp.DATA_LEN_D
+
+PLOT_EXP_P = np.array([7, 7]) # sampling from domain for plotting the scattering sampling points, should be equal to superp.DATA_LEN_D
+PLOT_LEN_P = np.power(2, PLOT_EXP_P) # the number of samples for each dimension of domain
+
+PLOT_VEC_SCALE = None
+
+------------------------------fine tune 5 from 4-----------------------------------------
+restart: 0 epoch: 1 batch: 4095 batch_loss: 0.0 batch_gradient: 0.49148446815363694 epoch_loss: 0.0 
+
+The last epoch: 1
+Success! The nn model is:
+
+tensor([[ 0.1149,  0.5467],
+        [ 0.4275,  0.2984],
+        [-0.1775,  0.0862],
+        [-0.3761,  0.6819],
+        [ 0.1487, -0.0492],
+        [ 0.2379, -0.6834],
+        [ 0.0389, -0.3609],
+        [ 0.4334, -1.3176],
+        [ 0.9111, -0.0625],
+        [-0.0881,  0.7379],
+        [ 0.5704,  0.1943],
+        [ 0.4654, -0.5360],
+        [-0.2123,  0.5544],
+        [ 0.5452,  0.5405],
+        [-0.3193, -0.0908],
+        [ 0.5005,  0.4010],
+        [-0.9437,  0.0942],
+        [-0.5586, -0.1215],
+        [-0.4199,  0.4477],
+        [-0.4310, -0.5372]])
+tensor([ 0.1604, -0.4252,  0.5667,  0.1456, -0.2516,  0.3577,  0.6017,  0.1714,
+        -0.5290,  0.1481, -0.5820, -0.6501,  0.9082,  1.0409,  0.2333, -0.0242,
+        -0.7445, -0.9134,  0.1340, -0.1339])
+tensor([[ 0.3353, -0.2225, -0.1939, -0.3313, -0.0240,  0.5018, -0.8976,  0.1964,
+         -0.5793,  0.4469, -0.1130,  1.0158,  0.6015, -0.5582, -0.6764,  0.6300,
+          0.1109, -0.3937, -0.2115,  0.3426]])
+tensor([0.3856])
+restart: 0
+
+Data generation totally cost: 0.47896814346313477
+Training totally cost: 18.045315504074097
+
+import torch
+import numpy as np
+from functools import reduce
+from operator import mul
+
+
+############################################
+# set default data type to double; for GPU
+# training use float
+############################################
+torch.set_default_dtype(torch.float64)
+torch.set_default_tensor_type(torch.DoubleTensor)
+# torch.set_default_dtype(torch.float32)
+# torch.set_default_tensor_type(torch.FloatTensor)
+
+
+# for output
+VERBOSE = 1
+
+
+############################################
+# set the network architecture
+############################################
+D_H = 20 # the number of neurons of each hidden layer
+N_H = 1 # then number of hidden layers
+
+
+############################################
+# for activation function definition
+############################################
+BENT_DEG = 0.0001
+
+
+############################################
+# set loss function definition
+############################################
+TOL_INIT = 0.01
+TOL_SAFE = 0.01
+TOL_BOUNDARY = 0.03
+TOL_LIE = 0.020
+TOL_NORM_LIE = 0.0
+WEIGHT_LIE = 1
+WEIGHT_NORM_LIE = 0
+
+DECAY_LIE = 1
+DECAY_INIT = 1
+DECAY_UNSAFE = 1
+
+
+############################################
+# for optimization method tunning: LBFGS
+############################################
+LBFGS_NUM_ITER = 1
+LBFGS_TOL_GRAD = 1e-05
+LBFGS_TOL_CHANGE = 1e-09
+LBFGS_NUM_HISTORY = 100
+LBFGS_LINE_SEARCH_FUN = None
+
+
+TOL_OPTIMIZER_RESET = -1
+SHRINK_RATE_FACTOR = 10
+FRACTION_INSTABLE_BATCH = 10000000000000000000
+NUM_BATCH_ITR = 3
+
+
+############################################
+# set the training super parameters
+############################################
+EPOCHS = 500
+
+
+############################################
+# my own scheduling policy: 
+# rate = alpha / (1 + beta * epoch^gamma)
+############################################
+ALPHA = 0.01 # initial learning rate
+BETA = 0 # if beta equals 0 then constant rate = alpha
+GAMMA = 0 # when beta is nonzero, larger gamma gives faster drop of rate
+
+
+############################################
+# training termination flags
+############################################
+LOSS_OPT_FLAG = 1e-16
+TOL_MAX_GRAD = 6
+
+
+############################################
+# for training set generation
+############################################
+TOL_DATA_GEN = 1e-16
+
+DATA_EXP_I = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_I = np.power(2, DATA_EXP_I) # the number of samples for each dimension of domain
+BLOCK_EXP_I = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_I = np.power(2, BLOCK_EXP_I) # number of batches for each dimension
+    # for this example, it is important to set the size of initial and unsafe not too large
+    # compared with the size of each batch of domain-lie
+DATA_EXP_U = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_U = np.power(2, DATA_EXP_U) # the number of samples for each dimension of domain
+BLOCK_EXP_U = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_U = np.power(2, BLOCK_EXP_U) # number of batches for each dimension
+
+DATA_EXP_D = np.array([8, 8]) # for sampling from initial; length = prob.DIM
+DATA_LEN_D = np.power(2, DATA_EXP_D) # the number of samples for each dimension of domain
+BLOCK_EXP_D = np.array([6, 6]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_D = np.power(2, BLOCK_EXP_D) # number of batches for each dimension
+
+
+############################################
+# number of mini_batches
+############################################
+BATCHES_I = reduce(mul, list(BLOCK_LEN_I))
+BATCHES_U = reduce(mul, list(BLOCK_LEN_U))
+BATCHES_D = reduce(mul, list(BLOCK_LEN_D))
+
+BATCHES = max(BATCHES_I, BATCHES_U, BATCHES_D)
+
+############################################
+# for plotting
+############################################
+PLOT_EXP_B = np.array([8, 8]) # sampling from domain for plotting the boundary of barrier using contour plot
+PLOT_LEN_B = np.power(2, PLOT_EXP_B) # the number of samples for each dimension of domain, usually larger than superp.DATA_LEN_D
+
+PLOT_EXP_V = np.array([7, 7]) # sampling from domain for plotting the vector field
+PLOT_LEN_V = np.power(2, PLOT_EXP_V) # the number of samples for each dimension of domain, usually equal to superp.DATA_LEN_D
+
+PLOT_EXP_P = np.array([7, 7]) # sampling from domain for plotting the scattering sampling points, should be equal to superp.DATA_LEN_D
+PLOT_LEN_P = np.power(2, PLOT_EXP_P) # the number of samples for each dimension of domain
+
+PLOT_VEC_SCALE = None
+
+--------------------------------------fine tune 6 from 5--------------------------
+restart: 0 epoch: 1 batch: 4095 batch_loss: 0.0 batch_gradient: 0.8150342316564305 epoch_loss: 0.0 
+
+The last epoch: 1
+Success! The nn model is:
+
+tensor([[ 0.1148,  0.5470],
+        [ 0.4275,  0.2984],
+        [-0.1774,  0.0860],
+        [-0.3760,  0.6816],
+        [ 0.1487, -0.0492],
+        [ 0.2377, -0.6829],
+        [ 0.0392, -0.3617],
+        [ 0.4332, -1.3175],
+        [ 0.9111, -0.0625],
+        [-0.0883,  0.7383],
+        [ 0.5704,  0.1943],
+        [ 0.4654, -0.5360],
+        [-0.2125,  0.5549],
+        [ 0.5454,  0.5400],
+        [-0.3191, -0.0914],
+        [ 0.5003,  0.4016],
+        [-0.9437,  0.0942],
+        [-0.5586, -0.1215],
+        [-0.4198,  0.4475],
+        [-0.4310, -0.5372]])
+tensor([ 0.1604, -0.4252,  0.5667,  0.1456, -0.2516,  0.3577,  0.6017,  0.1711,
+        -0.5290,  0.1481, -0.5820, -0.6501,  0.9082,  1.0409,  0.2333, -0.0242,
+        -0.7445, -0.9134,  0.1340, -0.1339])
+tensor([[ 0.3358, -0.2225, -0.1938, -0.3305, -0.0240,  0.5011, -0.8979,  0.1951,
+         -0.5793,  0.4476, -0.1130,  1.0158,  0.6021, -0.5579, -0.6764,  0.6302,
+          0.1109, -0.3937, -0.2109,  0.3426]])
+tensor([0.3856])
+restart: 0
+
+Data generation totally cost: 0.47342610359191895
+Training totally cost: 13.043519020080566
+
+------------parameters:-----------------
+import torch
+import numpy as np
+from functools import reduce
+from operator import mul
+
+
+############################################
+# set default data type to double; for GPU
+# training use float
+############################################
+torch.set_default_dtype(torch.float64)
+torch.set_default_tensor_type(torch.DoubleTensor)
+# torch.set_default_dtype(torch.float32)
+# torch.set_default_tensor_type(torch.FloatTensor)
+
+
+# for output
+VERBOSE = 1
+
+
+############################################
+# set the network architecture
+############################################
+D_H = 20 # the number of neurons of each hidden layer
+N_H = 1 # then number of hidden layers
+
+
+############################################
+# for activation function definition
+############################################
+BENT_DEG = 0.0001
+
+
+############################################
+# set loss function definition
+############################################
+TOL_INIT = 0.01
+TOL_SAFE = 0.01
+TOL_BOUNDARY = 0.03
+TOL_LIE = 0.025
+TOL_NORM_LIE = 0.0
+WEIGHT_LIE = 1
+WEIGHT_NORM_LIE = 0
+
+DECAY_LIE = 1
+DECAY_INIT = 1
+DECAY_UNSAFE = 1
+
+
+############################################
+# for optimization method tunning: LBFGS
+############################################
+LBFGS_NUM_ITER = 1
+LBFGS_TOL_GRAD = 1e-05
+LBFGS_TOL_CHANGE = 1e-09
+LBFGS_NUM_HISTORY = 100
+LBFGS_LINE_SEARCH_FUN = None
+
+
+TOL_OPTIMIZER_RESET = -1
+SHRINK_RATE_FACTOR = 10
+FRACTION_INSTABLE_BATCH = 10000000000000000000
+NUM_BATCH_ITR = 3
+
+
+############################################
+# set the training super parameters
+############################################
+EPOCHS = 500
+
+
+############################################
+# my own scheduling policy: 
+# rate = alpha / (1 + beta * epoch^gamma)
+############################################
+ALPHA = 0.01 # initial learning rate
+BETA = 0 # if beta equals 0 then constant rate = alpha
+GAMMA = 0 # when beta is nonzero, larger gamma gives faster drop of rate
+
+
+############################################
+# training termination flags
+############################################
+LOSS_OPT_FLAG = 1e-16
+TOL_MAX_GRAD = 6
+
+
+############################################
+# for training set generation
+############################################
+TOL_DATA_GEN = 1e-16
+
+DATA_EXP_I = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_I = np.power(2, DATA_EXP_I) # the number of samples for each dimension of domain
+BLOCK_EXP_I = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_I = np.power(2, BLOCK_EXP_I) # number of batches for each dimension
+    # for this example, it is important to set the size of initial and unsafe not too large
+    # compared with the size of each batch of domain-lie
+DATA_EXP_U = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_U = np.power(2, DATA_EXP_U) # the number of samples for each dimension of domain
+BLOCK_EXP_U = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_U = np.power(2, BLOCK_EXP_U) # number of batches for each dimension
+
+DATA_EXP_D = np.array([8, 8]) # for sampling from initial; length = prob.DIM
+DATA_LEN_D = np.power(2, DATA_EXP_D) # the number of samples for each dimension of domain
+BLOCK_EXP_D = np.array([6, 6]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_D = np.power(2, BLOCK_EXP_D) # number of batches for each dimension
+
+
+############################################
+# number of mini_batches
+############################################
+BATCHES_I = reduce(mul, list(BLOCK_LEN_I))
+BATCHES_U = reduce(mul, list(BLOCK_LEN_U))
+BATCHES_D = reduce(mul, list(BLOCK_LEN_D))
+
+BATCHES = max(BATCHES_I, BATCHES_U, BATCHES_D)
+
+############################################
+# for plotting
+############################################
+PLOT_EXP_B = np.array([8, 8]) # sampling from domain for plotting the boundary of barrier using contour plot
+PLOT_LEN_B = np.power(2, PLOT_EXP_B) # the number of samples for each dimension of domain, usually larger than superp.DATA_LEN_D
+
+PLOT_EXP_V = np.array([7, 7]) # sampling from domain for plotting the vector field
+PLOT_LEN_V = np.power(2, PLOT_EXP_V) # the number of samples for each dimension of domain, usually equal to superp.DATA_LEN_D
+
+PLOT_EXP_P = np.array([7, 7]) # sampling from domain for plotting the scattering sampling points, should be equal to superp.DATA_LEN_D
+PLOT_LEN_P = np.power(2, PLOT_EXP_P) # the number of samples for each dimension of domain
+
+PLOT_VEC_SCALE = None
+
+--------------------fine tune 7 from 6: verified by isat3--------------------------
+restart: 0 epoch: 3 batch: 4095 batch_loss: 0.0 batch_gradient: 0.41535287845587715 epoch_loss: 0.0 
+
+The last epoch: 3
+Success! The nn model is:
+
+tensor([[ 0.1146,  0.5471],
+        [ 0.4275,  0.2984],
+        [-0.1773,  0.0859],
+        [-0.3758,  0.6815],
+        [ 0.1487, -0.0492],
+        [ 0.2377, -0.6829],
+        [ 0.0398, -0.3620],
+        [ 0.4332, -1.3175],
+        [ 0.9111, -0.0625],
+        [-0.0886,  0.7385],
+        [ 0.5704,  0.1943],
+        [ 0.4654, -0.5360],
+        [-0.2129,  0.5551],
+        [ 0.5458,  0.5398],
+        [-0.3186, -0.0916],
+        [ 0.5005,  0.4009],
+        [-0.9437,  0.0942],
+        [-0.5586, -0.1215],
+        [-0.4197,  0.4474],
+        [-0.4310, -0.5372]])
+tensor([ 0.1604, -0.4252,  0.5667,  0.1456, -0.2516,  0.3577,  0.6017,  0.1710,
+        -0.5290,  0.1481, -0.5820, -0.6501,  0.9082,  1.0409,  0.2333, -0.0256,
+        -0.7445, -0.9134,  0.1340, -0.1339])
+tensor([[ 0.3359, -0.2225, -0.1936, -0.3300, -0.0240,  0.5010, -0.8981,  0.1950,
+         -0.5793,  0.4479, -0.1130,  1.0158,  0.6024, -0.5581, -0.6762,  0.6300,
+          0.1109, -0.3937, -0.2105,  0.3426]])
+tensor([0.3856])
+restart: 0
+
+Data generation totally cost: 0.5033447742462158
+Training totally cost: 35.60868048667908
+
+-----------------parameters-----------------------:
+import torch
+import numpy as np
+from functools import reduce
+from operator import mul
+
+
+############################################
+# set default data type to double; for GPU
+# training use float
+############################################
+torch.set_default_dtype(torch.float64)
+torch.set_default_tensor_type(torch.DoubleTensor)
+# torch.set_default_dtype(torch.float32)
+# torch.set_default_tensor_type(torch.FloatTensor)
+
+
+# for output
+VERBOSE = 1
+
+
+############################################
+# set the network architecture
+############################################
+D_H = 20 # the number of neurons of each hidden layer
+N_H = 1 # then number of hidden layers
+
+
+############################################
+# for activation function definition
+############################################
+BENT_DEG = 0.0001
+
+
+############################################
+# set loss function definition
+############################################
+TOL_INIT = 0.01
+TOL_SAFE = 0.01
+TOL_BOUNDARY = 0.025
+TOL_LIE = 0.03
+TOL_NORM_LIE = 0.0
+WEIGHT_LIE = 1
+WEIGHT_NORM_LIE = 0
+
+DECAY_LIE = 1
+DECAY_INIT = 1
+DECAY_UNSAFE = 1
+
+
+############################################
+# for optimization method tunning: LBFGS
+############################################
+LBFGS_NUM_ITER = 1
+LBFGS_TOL_GRAD = 1e-05
+LBFGS_TOL_CHANGE = 1e-09
+LBFGS_NUM_HISTORY = 100
+LBFGS_LINE_SEARCH_FUN = None
+
+
+TOL_OPTIMIZER_RESET = -1
+SHRINK_RATE_FACTOR = 10
+FRACTION_INSTABLE_BATCH = 10000000000000000000
+NUM_BATCH_ITR = 3
+
+
+############################################
+# set the training super parameters
+############################################
+EPOCHS = 500
+
+
+############################################
+# my own scheduling policy: 
+# rate = alpha / (1 + beta * epoch^gamma)
+############################################
+ALPHA = 0.001 # initial learning rate
+BETA = 0 # if beta equals 0 then constant rate = alpha
+GAMMA = 0 # when beta is nonzero, larger gamma gives faster drop of rate
+
+
+############################################
+# training termination flags
+############################################
+LOSS_OPT_FLAG = 1e-16
+TOL_MAX_GRAD = 6
+
+
+############################################
+# for training set generation
+############################################
+TOL_DATA_GEN = 1e-16
+
+DATA_EXP_I = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_I = np.power(2, DATA_EXP_I) # the number of samples for each dimension of domain
+BLOCK_EXP_I = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_I = np.power(2, BLOCK_EXP_I) # number of batches for each dimension
+    # for this example, it is important to set the size of initial and unsafe not too large
+    # compared with the size of each batch of domain-lie
+DATA_EXP_U = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+DATA_LEN_U = np.power(2, DATA_EXP_U) # the number of samples for each dimension of domain
+BLOCK_EXP_U = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_U = np.power(2, BLOCK_EXP_U) # number of batches for each dimension
+
+DATA_EXP_D = np.array([8, 8]) # for sampling from initial; length = prob.DIM
+DATA_LEN_D = np.power(2, DATA_EXP_D) # the number of samples for each dimension of domain
+BLOCK_EXP_D = np.array([6, 6]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_D = np.power(2, BLOCK_EXP_D) # number of batches for each dimension
+
+
+############################################
+# number of mini_batches
+############################################
+BATCHES_I = reduce(mul, list(BLOCK_LEN_I))
+BATCHES_U = reduce(mul, list(BLOCK_LEN_U))
+BATCHES_D = reduce(mul, list(BLOCK_LEN_D))
+
+BATCHES = max(BATCHES_I, BATCHES_U, BATCHES_D)
+
+############################################
+# for plotting
+############################################
+PLOT_EXP_B = np.array([8, 8]) # sampling from domain for plotting the boundary of barrier using contour plot
+PLOT_LEN_B = np.power(2, PLOT_EXP_B) # the number of samples for each dimension of domain, usually larger than superp.DATA_LEN_D
+
+PLOT_EXP_V = np.array([7, 7]) # sampling from domain for plotting the vector field
+PLOT_LEN_V = np.power(2, PLOT_EXP_V) # the number of samples for each dimension of domain, usually equal to superp.DATA_LEN_D
+
+PLOT_EXP_P = np.array([7, 7]) # sampling from domain for plotting the scattering sampling points, should be equal to superp.DATA_LEN_D
+PLOT_LEN_P = np.power(2, PLOT_EXP_P) # the number of samples for each dimension of domain
+
+PLOT_VEC_SCALE = None
+

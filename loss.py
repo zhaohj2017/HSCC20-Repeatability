@@ -28,8 +28,6 @@ def calc_loss(model, input_init, input_unsafe, input_domain):
     # compute the output of nn on domain
     input_domain.requires_grad = True # temporarily enable gradient
     output_domain = model(input_domain)
-    print(output_domain)
-    input()
 
     # compute the gradient of nn on domain
     gradient_domain = torch.autograd.grad(

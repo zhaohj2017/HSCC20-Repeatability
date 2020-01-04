@@ -116,7 +116,7 @@ def plot_barrier_2d(model):
             ax.add_patch(unsafe)
 
     plt.axis([prob.DOMAIN[0][0], prob.DOMAIN[0][1], prob.DOMAIN[1][0], prob.DOMAIN[1][1]])
-    plt.axis('equal')
+    # plt.axis('equal') ##PLOT_VEC_SCALE = None
     plt.show()
 
 

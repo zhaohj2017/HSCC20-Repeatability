@@ -5,3 +5,4 @@ TODO:
 
 1. load learned model
 2. random sampling for data generation
+3. move dataset to GPU

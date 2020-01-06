@@ -31,14 +31,14 @@ def calc_loss(model, input_init, input_unsafe, input_domain):
 
     # compute the gradient of nn on domain
     gradient_domain = torch.autograd.grad(
-            list(output_domain),
+            torch.sum(output_domain),
             input_domain,
             grad_outputs=None,
             create_graph=True,
             only_inputs=True,
             allow_unused=True)[0]
     input_domain.requires_grad = False # temporarily disable gradient
-    
+
     # compute the vector field on domain
     vector_domain = prob.vector_field(input_domain) # with torch.no_grad():
   

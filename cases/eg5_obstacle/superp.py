@@ -13,7 +13,7 @@ torch.set_default_tensor_type(torch.DoubleTensor)
 # torch.set_default_tensor_type(torch.FloatTensor)
 
 # for output
-VERBOSE = 0
+VERBOSE = 1
 
 
 ############################################
@@ -62,10 +62,10 @@ GAMMA = 0 # when beta is nonzero, larger gamma gives faster drop of rate
 ###########################7#################
 # set loss function definition
 ############################################
-TOL_INIT = 0.01
-TOL_SAFE = 0.01
+TOL_INIT = 0.0
+TOL_SAFE = 0.0
 TOL_BOUNDARY = 0.05
-TOL_LIE = 0.001
+TOL_LIE = 0.0
 TOL_NORM_LIE = 0.0
 WEIGHT_LIE = 1
 WEIGHT_NORM_LIE = 0

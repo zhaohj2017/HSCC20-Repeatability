@@ -34,10 +34,10 @@ BENT_DEG = 0.0001
 ############################################
 # set loss function definition
 ############################################
-TOL_INIT = 0.01
-TOL_SAFE = 0.01
-TOL_BOUNDARY = 0.025
-TOL_LIE = 0.035
+TOL_INIT = 0.0
+TOL_SAFE = 0.0
+TOL_BOUNDARY = 0.05
+TOL_LIE = 0.001
 TOL_NORM_LIE = 0.0
 WEIGHT_LIE = 1
 WEIGHT_NORM_LIE = 0
@@ -73,7 +73,7 @@ EPOCHS = 500
 # my own scheduling policy: 
 # rate = alpha / (1 + beta * epoch^gamma)
 ############################################
-ALPHA = 0.001 # initial learning rate
+ALPHA = 0.01 # initial learning rate
 BETA = 0 # if beta equals 0 then constant rate = alpha
 GAMMA = 0 # when beta is nonzero, larger gamma gives faster drop of rate
 
@@ -129,3 +129,4 @@ PLOT_EXP_P = np.array([7, 7]) # sampling from domain for plotting the scattering
 PLOT_LEN_P = np.power(2, PLOT_EXP_P) # the number of samples for each dimension of domain
 
 PLOT_VEC_SCALE = None
+

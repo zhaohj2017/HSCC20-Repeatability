@@ -88,12 +88,12 @@ def vector_field(x):
                 return torch.sum(x * y, dim=1)
 
             x_vec = x[:, 0:2]
-            obs = torch.tensor([0.0, 0.0])
+            obs = torch.tensor([0.0, 0.0]).cuda()
             obs_vec = obs.repeat(len(x), 1)
             x_obs = obs_vec - x_vec
             x_obs_norm_sqr = dot_prod(x_obs, x_obs)
 
-            goal = torch.tensor([1.0, 0.0])
+            goal = torch.tensor([1.0, 0.0]).cuda()
             goal_vec = goal.repeat(len(x), 1)
 
             dir_x = torch.stack([torch.sin(x[:, 2]), torch.cos(x[:, 2])], dim=1)

@@ -33,5 +33,6 @@ def gen_nn():
     # nn model
     layers = layer_input + layer_hidden + layer_output
     model = nn.Sequential(*layers)
+    model.cuda()
 
     return model

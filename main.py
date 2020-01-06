@@ -32,4 +32,4 @@ print("\nData generation totally cost:", time_end_data - time_start_data)
 print("Training totally cost:", time_end_train - time_start_train)
 
 # plot
-plot.plot_barrier(model)
+# plot.plot_barrier(model) # do not plot on gpu

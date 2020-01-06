@@ -36,6 +36,8 @@ def gen_batch_data():
         
         batch_list = [torch.reshape(curr_tensor, [-1, prob.DIM]) for curr_tensor in batch_list]
         batch_list = [curr_tensor[filter(curr_tensor)] for curr_tensor in batch_list]
+        batch_list = [curr_tensor.cuda() for curr_tensor in batch_list]
+
 
         return batch_list
 

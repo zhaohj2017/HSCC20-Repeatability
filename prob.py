@@ -20,8 +20,8 @@ DIM = 2
 # set the super-rectangle range
 ############################################
 # set the initial in super-rectangle
-INIT = [[-0.9, -0.1], \
-            [0.1, 0.9] \
+INIT = [[1, 2], \
+            [-0.5, 0.5], \
         ]
 
 INIT_SHAPE = 2 # 2 for circle
@@ -29,23 +29,19 @@ INIT_SHAPE = 2 # 2 for circle
 SUB_INIT = []
 SUB_INIT_SHAPE = []
 
-
 # the the unsafe in super-rectangle
-UNSAFE = [[0.4, 1.0], \
-            [-1.0, -0.4] \
+UNSAFE = [[-1.4, -0.6], \
+            [-1.4, -0.6], \
         ]
 
 UNSAFE_SHAPE = 2 # 2 for circle
 
-SUB_UNSAFE = [
-]
-
+SUB_UNSAFE = []
 SUB_UNSAFE_SHAPE = []
 
-
 # the the domain in super-rectangle
-DOMAIN = [[-2, 2], \
-            [-2, 2], \
+DOMAIN = [[-3, 2.5], \
+            [-2, 1], \
         ]
 
 DOMAIN_SHAPE = 1 # 1 for rectangle
@@ -54,10 +50,10 @@ DOMAIN_SHAPE = 1 # 1 for rectangle
 # set the range constraints
 ############################################
 def cons_init(x): # accept a two-dimensional tensor and return a tensor of bool with the same number of columns
-    return torch.pow(x[:, 0] + 0.5, 2) + torch.pow(x[:, 1] - 0.5, 2) <= 0.16 + superp.TOL_DATA_GEN
+    return torch.pow(x[:, 0] - 1.5, 2) + torch.pow(x[:, 1], 2) <= 0.25 + superp.TOL_DATA_GEN # x[:, 0] stands for x1 and x[:, 1] stands for x2
 
 def cons_unsafe(x):
-    return torch.pow(x[:, 0] - 0.7, 2) + torch.pow(x[:, 1] + 0.7, 2) <= 0.09 + superp.TOL_DATA_GEN 
+    return torch.pow(x[:, 0] + 1, 2) + torch.pow(x[:, 1] + 1, 2) <= 4 / 25.0 + superp.TOL_DATA_GEN # x[:, 0] stands for x1 and x[:, 1] stands for x2
 
 def cons_domain(x):
     return x[:, 0] == x[:, 0] # equivalent to True
@@ -71,10 +67,9 @@ def vector_field(x):
     # the vector of functions
     def f(i, x):
         if i == 1:
-            return torch.exp(-x[:, 0]) + x[:, 1] - 1 # x[:, 1] stands for x2
+            return x[:, 1] # x[:, 1] stands for x2
         elif i == 2:
-            return -1 * torch.sin(x[:, 0]) * torch.sin(x[:, 0]) # x[:, 0] stands for x1
-
+            return - x[:, 0] - x[:, 1] + torch.pow(x[:, 0], 3) / 3.0 # x[:, 0] stands for x1
         else:
             print("Vector function error!")
             exit()

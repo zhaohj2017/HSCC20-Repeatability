@@ -7,10 +7,10 @@ from operator import mul
 # set default data type to double; for GPU
 # training use float
 ############################################
-torch.set_default_dtype(torch.float64)
-torch.set_default_tensor_type(torch.DoubleTensor)
-# torch.set_default_dtype(torch.float32)
-# torch.set_default_tensor_type(torch.FloatTensor)
+# torch.set_default_dtype(torch.float64)
+# torch.set_default_tensor_type(torch.DoubleTensor)
+torch.set_default_dtype(torch.float32)
+torch.set_default_tensor_type(torch.FloatTensor)
 
 # for output
 VERBOSE = 1

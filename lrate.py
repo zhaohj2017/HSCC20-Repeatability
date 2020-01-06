@@ -7,10 +7,10 @@ import superp
 ############################################
 # set default data type to double
 ############################################
-torch.set_default_dtype(torch.float64)
-torch.set_default_tensor_type(torch.DoubleTensor)
-# torch.set_default_dtype(torch.float32)
-# torch.set_default_tensor_type(torch.FloatTensor)
+# torch.set_default_dtype(torch.float64)
+# torch.set_default_tensor_type(torch.DoubleTensor)
+torch.set_default_dtype(torch.float32)
+torch.set_default_tensor_type(torch.FloatTensor)
 
 
 ############################################

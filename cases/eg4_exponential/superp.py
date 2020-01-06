@@ -3,7 +3,6 @@ import numpy as np
 from functools import reduce
 from operator import mul
 
-
 ############################################
 # set default data type to double; for GPU
 # training use float
@@ -11,7 +10,7 @@ from operator import mul
 torch.set_default_dtype(torch.float64)
 torch.set_default_tensor_type(torch.DoubleTensor)
 # torch.set_default_dtype(torch.float32)
-# torch.set_default_tensor_type(torch.FloatTensor)
+# torch.set_default_tensor_type(torc.h.FloatTensor)
 
 
 # for output
@@ -34,10 +33,10 @@ BENT_DEG = 0.0001
 ############################################
 # set loss function definition
 ############################################
-TOL_INIT = 0.025
-TOL_SAFE = 0.025
+TOL_INIT = 0.0
+TOL_SAFE = 0.0
 TOL_BOUNDARY = 0.05
-TOL_LIE = 0.005
+TOL_LIE = 0.001
 TOL_NORM_LIE = 0.0
 WEIGHT_LIE = 1
 WEIGHT_NORM_LIE = 0
@@ -56,24 +55,24 @@ LBFGS_TOL_CHANGE = 1e-09
 LBFGS_NUM_HISTORY = 100
 LBFGS_LINE_SEARCH_FUN = None
 
-
+# fine tuning using LBFGS
 TOL_OPTIMIZER_RESET = -1
 SHRINK_RATE_FACTOR = 10
-FRACTION_INSTABLE_BATCH = 10000000000000000000
+FRACTION_INSTABLE_BATCH = 1000000000000000000000
 NUM_BATCH_ITR = 3
 
 
 ############################################
-# set the training super parameters
+# number of training epochs
 ############################################
-EPOCHS = 100
+EPOCHS = 500
 
 
 ############################################
 # my own scheduling policy: 
 # rate = alpha / (1 + beta * epoch^gamma)
 ############################################
-ALPHA = 0.01 # initial learning rate
+ALPHA = 0.1 # initial learning rate
 BETA = 0 # if beta equals 0 then constant rate = alpha
 GAMMA = 0 # when beta is nonzero, larger gamma gives faster drop of rate
 
@@ -90,15 +89,14 @@ TOL_MAX_GRAD = 6
 ############################################
 TOL_DATA_GEN = 1e-16
 
-DATA_EXP_I = np.array([5, 5]) # for sampling from initial; length = prob.DIM
+DATA_EXP_I = np.array([6, 6]) # for sampling from initial; length = prob.DIM
 DATA_LEN_I = np.power(2, DATA_EXP_I) # the number of samples for each dimension of domain
-BLOCK_EXP_I = np.array([3, 3]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_EXP_I = np.array([4, 4]) # 0 <= BATCH_EXP <= DATA_EXP
 BLOCK_LEN_I = np.power(2, BLOCK_EXP_I) # number of batches for each dimension
-    # for this example, it is important to set the size of initial and unsafe not too large
-    # compared with the size of each batch of domain-lie
-DATA_EXP_U = np.array([7, 7]) # for sampling from initial; length = prob.DIM
+
+DATA_EXP_U = np.array([6, 6]) # for sampling from initial; length = prob.DIM
 DATA_LEN_U = np.power(2, DATA_EXP_U) # the number of samples for each dimension of domain
-BLOCK_EXP_U = np.array([5, 5]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_EXP_U = np.array([4, 4]) # 0 <= BATCH_EXP <= DATA_EXP
 BLOCK_LEN_U = np.power(2, BLOCK_EXP_U) # number of batches for each dimension
 
 DATA_EXP_D = np.array([8, 8]) # for sampling from initial; length = prob.DIM
@@ -116,6 +114,7 @@ BATCHES_D = reduce(mul, list(BLOCK_LEN_D))
 
 BATCHES = max(BATCHES_I, BATCHES_U, BATCHES_D)
 
+
 ############################################
 # for plotting
 ############################################
@@ -123,7 +122,7 @@ PLOT_EXP_B = np.array([8, 8]) # sampling from domain for plotting the boundary o
 PLOT_LEN_B = np.power(2, PLOT_EXP_B) # the number of samples for each dimension of domain, usually larger than superp.DATA_LEN_D
 
 PLOT_EXP_V = np.array([7, 7]) # sampling from domain for plotting the vector field
-PLOT_LEN_V = np.power(2, PLOT_EXP_V) # the number of samples for each dimension of domain, usually equal to superp.DATA_LEN_D
+PLOT_LEN_V = np.power(2, PLOT_EXP_V) # the number of samples for each dimension of domain, usually equal to PLOT_LEN_P
 
 PLOT_EXP_P = np.array([7, 7]) # sampling from domain for plotting the scattering sampling points, should be equal to superp.DATA_LEN_D
 PLOT_LEN_P = np.power(2, PLOT_EXP_P) # the number of samples for each dimension of domain

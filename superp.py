@@ -10,14 +10,17 @@ from operator import mul
 torch.set_default_dtype(torch.float64)
 torch.set_default_tensor_type(torch.DoubleTensor)
 # torch.set_default_dtype(torch.float32)
-# torch.set_default_tensor_type(torch.FloatTensor)
+# torch.set_default_tensor_type(torc.h.FloatTensor)
 
+
+# for output
 VERBOSE = 1
+
 
 ############################################
 # set the network architecture
 ############################################
-D_H = 5 # the number of neurons of each hidden layer
+D_H = 10 # the number of neurons of each hidden layer
 N_H = 1 # then number of hidden layers
 
 
@@ -30,11 +33,11 @@ BENT_DEG = 0.0001
 ############################################
 # set loss function definition
 ############################################
-TOL_INIT = 0.02
-TOL_SAFE = 0.02
+TOL_INIT = 0.0
+TOL_SAFE = 0.0
 TOL_BOUNDARY = 0.05
-TOL_LIE = 0.01
-TOL_NORM_LIE = 0
+TOL_LIE = 0.001
+TOL_NORM_LIE = 0.0
 WEIGHT_LIE = 1
 WEIGHT_NORM_LIE = 0
 
@@ -52,17 +55,17 @@ LBFGS_TOL_CHANGE = 1e-09
 LBFGS_NUM_HISTORY = 100
 LBFGS_LINE_SEARCH_FUN = None
 
-
+# fine tuning using LBFGS
 TOL_OPTIMIZER_RESET = -1
-SHRINK_RATE_FACTOR = 2
+SHRINK_RATE_FACTOR = 10
 FRACTION_INSTABLE_BATCH = 1000000000000000000000
-NUM_BATCH_ITR = 5
+NUM_BATCH_ITR = 3
 
 
 ############################################
 # number of training epochs
 ############################################
-EPOCHS = 10
+EPOCHS = 500
 
 
 ############################################
@@ -86,14 +89,14 @@ TOL_MAX_GRAD = 6
 ############################################
 TOL_DATA_GEN = 1e-16
 
-DATA_EXP_I = np.array([5, 5]) # for sampling from initial; length = prob.DIM
+DATA_EXP_I = np.array([6, 6]) # for sampling from initial; length = prob.DIM
 DATA_LEN_I = np.power(2, DATA_EXP_I) # the number of samples for each dimension of domain
-BLOCK_EXP_I = np.array([3, 3]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_EXP_I = np.array([4, 4]) # 0 <= BATCH_EXP <= DATA_EXP
 BLOCK_LEN_I = np.power(2, BLOCK_EXP_I) # number of batches for each dimension
 
-DATA_EXP_U = np.array([5, 5]) # for sampling from initial; length = prob.DIM
+DATA_EXP_U = np.array([6, 6]) # for sampling from initial; length = prob.DIM
 DATA_LEN_U = np.power(2, DATA_EXP_U) # the number of samples for each dimension of domain
-BLOCK_EXP_U = np.array([3, 3]) # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_EXP_U = np.array([4, 4]) # 0 <= BATCH_EXP <= DATA_EXP
 BLOCK_LEN_U = np.power(2, BLOCK_EXP_U) # number of batches for each dimension
 
 DATA_EXP_D = np.array([8, 8]) # for sampling from initial; length = prob.DIM
@@ -118,10 +121,10 @@ BATCHES = max(BATCHES_I, BATCHES_U, BATCHES_D)
 PLOT_EXP_B = np.array([8, 8]) # sampling from domain for plotting the boundary of barrier using contour plot
 PLOT_LEN_B = np.power(2, PLOT_EXP_B) # the number of samples for each dimension of domain, usually larger than superp.DATA_LEN_D
 
-PLOT_EXP_V = np.array([6, 6]) # sampling from domain for plotting the vector field
+PLOT_EXP_V = np.array([7, 7]) # sampling from domain for plotting the vector field
 PLOT_LEN_V = np.power(2, PLOT_EXP_V) # the number of samples for each dimension of domain, usually equal to PLOT_LEN_P
 
-PLOT_EXP_P = np.array([6, 6]) # sampling from domain for plotting the scattering sampling points, could be equal to PLOT_EXP_V
+PLOT_EXP_P = np.array([7, 7]) # sampling from domain for plotting the scattering sampling points, should be equal to superp.DATA_LEN_D
 PLOT_LEN_P = np.power(2, PLOT_EXP_P) # the number of samples for each dimension of domain
 
 PLOT_VEC_SCALE = None

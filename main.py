@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import superp
 import train
 import plot
 import ann
@@ -18,6 +19,10 @@ torch.set_default_tensor_type(torch.DoubleTensor)
 # generating training model
 model = ann.gen_nn()
 
+# loading pre-trained model
+if superp.FINE_TUNE == 1:
+    model.load_state_dict(torch.load('pre-trained.pt'), strict=True)
+
 # generate training data
 time_start_data = time.time()
 batches_init, batches_unsafe, batches_domain = data.gen_batch_data()
@@ -30,6 +35,9 @@ time_end_train = time.time()
 
 print("\nData generation totally cost:", time_end_data - time_start_data)
 print("Training totally cost:", time_end_train - time_start_train)
+
+# save model
+torch.save(model.state_dict(), 'pre-trained.pt')
 
 # plot
 plot.plot_barrier(model)

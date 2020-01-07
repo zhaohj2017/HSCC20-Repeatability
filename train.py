@@ -46,27 +46,17 @@ def itr_train(model, batches_init, batches_unsafe, batches_domain):
         nonlocal scheduler
 
         with torch.no_grad():
-            print("Initialize parameters!")
-            print("")
+            if superp.FINE_TUNE == 0:
+                    print("Initialize parameters!")
+                    print("")
 
-            for p in model.parameters():
-                nn.init.normal_(p) #standard Gaussian distribution
+                    for p in model.parameters():
+                        nn.init.normal_(p) #standard Gaussian distribution
+            else:
+                model.load_state_dict(torch.load('pre-trained.pt'), strict=True)
 
         optimizer = opt.set_optimizer(model)
         scheduler = lrate.set_scheduler(optimizer)
-
-
-    # used for loading parameters from pre-trained models
-    def load_p():
-        print("Loading parameters!\n")
-        list_p = [ # input the learned parameters here
-        ]
-        # load parameters
-        i = 0
-        for p in model.parameters():
-            p.data = list_p[i]
-            i = i + 1
-
 
     # half_p() is to prevent generating a nn with large gradient, it works only for nn model with a single hidden layer
     def half_p():
@@ -139,7 +129,6 @@ def itr_train(model, batches_init, batches_unsafe, batches_domain):
     while num_restart < 5:
         num_restart += 1
         initialize_p() # restart by re-initializing nn parameters
-        # load_p()
         
         # for precise tuning of each batch
         reset_optimizer_flag = False

@@ -68,18 +68,11 @@ Southwest University, Chongqing, 400715, P.~R.~China\\
 %
 %
 \section{Introduction}
-\subsection{A Subsection Sample}
-
-Please \cite{Prajna04safetyverification} try \cite{BarryICRA2012} avoid rasterized images for line-art diagrams and
-schemas. Whenever possible, use vector graphics instead (see
-Fig.~\ref{fig1}).
-
-\begin{figure}
-\includegraphics[width=\textwidth]{./fig/batch_data}
-\caption{A figure caption is always placed below the illustration.
-Please note that short captions are centered, while long ones are
-justified by the macro package automatically.} \label{fig1}
-\end{figure}
+In our paper \emph{Synthesizing Barrier Certificates Using Neural Networks} accepted by HSCC'20, we developed a tool named \textsf{nnbarrier}
+that can automatically learn a barrier ceritificate represented by a neural network for the safety verification of a continuous dynamical system. 
+Here we give a short instruction to the use of \textsf{nnbarrier}, covering the system requirements, installation process, the structure of source codes,
+sample inputs, and user-defined inputs. We will emphasize what parts that were presented in the submitted paper will be covered in the instruction, for the purpose of repeatability
+evaluation. If there is any problem in using \textsf{nnbarrier}, please contact \email{zhaohj2016@swu.edu.cn}.
 
 \section{Installation}
 \begin{itemize}
@@ -95,8 +88,10 @@ justified by the macro package automatically.} \label{fig1}
     \item python: 3.6.7 python3 --version \pyth{__init__}
     \item pip3: sudo apt install python3-pip
     \item git: sudo apt install git
-    \item pytorch: \url{https://pytorch.org/} \begin{verbatim}pip3 install torch==1.3.1+cpu torchvision==0.4.2+cpu -f 
+    \item pytorch 1.3.1 cpu, torchvision 0.4.2 cpu: \url{https://pytorch.org/} \begin{verbatim}pip3 install torch==1.3.1+cpu torchvision==0.4.2+cpu -f 
     https://download.pytorch.org/whl/torch_stable.html\end{verbatim}
+    \item python package: numpy, matplotlib \url{https://matplotlib.org/} \url{https://matplotlib.org/users/installing.html}
+    \item mayavi \url{http://docs.enthought.com/mayavi/mayavi/} \url{http://docs.enthought.com/mayavi/mayavi/installation.html#installing-with-pip}
 \end{itemize}
 
 \begin{python}
@@ -115,6 +110,19 @@ justified by the macro package automatically.} \label{fig1}
 \section{Define Your Own Problem}
 
 \section{Fine-Tuning}
+
+\subsection{A Subsection Sample}
+
+Please \cite{Prajna04safetyverification} try \cite{BarryICRA2012} avoid rasterized images for line-art diagrams and
+schemas. Whenever possible, use vector graphics instead (see
+Fig.~\ref{fig1}).
+
+\begin{figure}
+\includegraphics[width=\textwidth]{./fig/batch_data}
+\caption{A figure caption is always placed below the illustration.
+Please note that short captions are centered, while long ones are
+justified by the macro package automatically.} \label{fig1}
+\end{figure}
 
 \bibliographystyle{splncs04}
 \bibliography{instruction}

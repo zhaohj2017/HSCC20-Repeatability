@@ -12,6 +12,39 @@
 % to display URLs in blue roman font according to Springer's eBook style:
 % \renewcommand\UrlFont{\color{blue}\rmfamily}
 
+\usepackage{hyperref} % for url
+\usepackage{pythonhighlight} % for python
+
+%% listings for python
+\usepackage{xcolor}     %高亮使用的颜色
+\definecolor{commentcolor}{RGB}{85,139,78}
+\definecolor{stringcolor}{RGB}{206,145,108}
+\definecolor{keywordcolor}{RGB}{34,34,250}
+\definecolor{backcolor}{RGB}{220,220,220}
+\usepackage{accsupp}    
+\newcommand{\emptyaccsupp}[1]{\BeginAccSupp{ActualText={}}#1\EndAccSupp{}}
+\usepackage{listings}
+\lstset{                        %高亮代码设置
+    language=python,                    %Python语法高亮
+    linewidth=0.9\linewidth,            %列表list宽度
+    %basicstyle=\ttfamily,              %tt无法显示空格
+    commentstyle=\color{commentcolor},  %注释颜色
+    keywordstyle=\color{keywordcolor},  %关键词颜色
+    stringstyle=\color{stringcolor},    %字符串颜色
+    %showspaces=true,                   %显示空格
+    numbers=left,                       %行数显示在左侧
+    numberstyle=\tiny\emptyaccsupp,     %行数数字格式
+    numbersep=5pt,                      %数字间隔
+    frame=single,                       %加框
+    framerule=0pt,                      %不划线
+    escapeinside=@@,                    %逃逸标志
+    emptylines=1,                       %
+    xleftmargin=3em,                    %list左边距
+    backgroundcolor=\color{backcolor},  %列表背景色
+    tabsize=4,                          %制表符长度为4个字符
+    gobble=4                            %忽略每行代码前4个字符
+    }
+
 \begin{document}
 %
 \title{A Short Instruction for \sf{nnbarrier}}
@@ -55,7 +88,27 @@ justified by the macro package automatically.} \label{fig1}
 \item Instructions for installing and running the software and extracting the corresponding results. 
 \end{itemize}
 
+\begin{itemize}
+    \item hscc2020 hscc20:111111
+    \item ubuntu: 18.04.02 LTS \url{https://ubuntu.com/download/desktop}
+    \item gcc: sudo apt update; sudo apt install build-essential; gcc --version
+    \item python: 3.6.7 python3 --version \pyth{__init__}
+    \item pip3: sudo apt install python3-pip
+    \item git: sudo apt install git
+    \item pytorch: \url{https://pytorch.org/} \begin{verbatim}pip3 install torch==1.3.1+cpu torchvision==0.4.2+cpu -f 
+    https://download.pytorch.org/whl/torch_stable.html\end{verbatim}
+\end{itemize}
+
+\begin{python}
+    if i==0:
+        abc
+    else:
+        def
+\end{python}
+
 \section{Sample Input}
+
+\inputpython{../ann.py}{2}{5}
 
 \section{Cases in the Paper}
 

@@ -231,7 +231,20 @@ We have the following remarks on the repeatability of $T_{\textsf{\tiny nnbarrie
 \begin{enumerate}
     \item The time costs reported in the paper are obtained on the platform running Ubuntu~18.04.02 with Intel i7-8550u
             CPU and 32GB memory; the installed packages are \textsf{\small Python~3.6.7} and \textsf{\small Pytorch~1.2.0};
-    \item The time costs reported in the paper are averaged over 5 separate runs for all 5 examples:
+    \item The time costs reported in the paper are averaged over 5 separate runs for Examples~2-5:
+    \begin{table}
+        \centering
+        \caption{Training time costs (in \textsf{seconds}) over 5 runs for Examples~2-5}
+        \label{tbl:platform}
+        \begin{tabular}{|c|c|c|c|c|c|c|} 
+            \hline                  & Run~1     & Run~2     & Run~3   & Run~4 & Run~5 & Average \\ 
+            \hline Example~2        & 3.6.7     & 9.0.1     & 1.2.0   &       &       &  \\ 
+            \hline Example~3        & 3.6.9     & 19.3.1    & 1.3.1   &       &       &     \\ 
+            \hline Example~4        & 3.7.3     & 19.3.1    & 1.3.1   &       &       &  \\
+            \hline Example~5        & 3.7.6     & 19.3.1    & 1.3.1   &       &       &   \\ 
+            \hline
+        \end{tabular}
+    \end{table}
     \item random, be patient
 \end{enumerate}
 

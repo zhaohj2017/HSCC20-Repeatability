@@ -71,7 +71,7 @@ Southwest University, Chongqing, 400715, P.~R.~China\\
 In our paper \emph{Synthesizing Barrier Certificates Using Neural Networks} accepted by HSCC'20, we developed a tool named \textsf{nnbarrier}
 that can automatically learn a barrier ceritificate represented by a neural network for the safety verification of a continuous dynamical system. 
 Here we give a short instruction to the use of \textsf{nnbarrier}, covering the system requirements, installation process, the structure of source codes,
-sample inputs, and user-defined inputs. We will emphasize what parts that were presented in the submitted paper will be covered in the instruction, for the purpose of repeatability
+sample and user-defined inputs. We will emphasize what parts that were presented in the submitted paper will be covered in the instruction, for the purpose of repeatability
 evaluation. If there is any problem in using \textsf{nnbarrier}, please contact \email{zhaohj2016@swu.edu.cn}.
 
 \section{Installation}
@@ -157,7 +157,7 @@ Each of the 5 sub-folders consists of 2 Python source files with the same names 
     \item {\color{purple}\textsf{prob.py}}: specify the safety verification problem of the corresponding example
     \item {\color{purple}\textsf{superp.py}}: specify the super-parameters for training the neural network of the corresponding problem
 \end{itemize}
-These are the two files that needs modification for solving user-defined problems.
+These are the two files that need modifications for solving user-defined problems.
 
 \subsubsection{Test \textsf{nnbarrier}.} Suppose you are using Linux or Mac and located in the \textsf{HSCC20-Repeatability} directory. Execute the command
 \begin{verbatim}              
@@ -176,20 +176,59 @@ as presented in our paper.
 \end{figure}
 
 \section{Repeatability Evaluation}
+In this section we present some instructions for repeatability evaluation on our reported results in the paper. We will cover Examples~1-5 and 
+the related Figure~5, Figure~7, Figure~8, Table~1, and Figure~6.
 
-5 cases, figures, tables
-
-\subsection{Tables}
-
+\subsection{Repeatability of Figures~5, 7, and 8}
+Suppose you are using Linux or Mac and have changed into the directory \textsf{HSCC20-Repeatability}. 
 \begin{itemize}
-    \item What elements of the paper are included in the REP (e.g.: specific figures, tables, etc.).
-    \item Instructions for installing and running the software and extracting the corresponding results. 
+\item Execute the command
+\begin{verbatim}              
+        cp ./cases/eg1_prajna_original/*.py .
+\end{verbatim}
+followed by 
+\begin{verbatim}              
+        python main.py
+\end{verbatim}
+to create Figure~5;
+\item Execute the command
+\begin{verbatim}              
+        cp ./cases/eg2_prajna_modified/*.py .
+\end{verbatim}
+followed by 
+\begin{verbatim}              
+        python main.py
+\end{verbatim}
+to create Figure~7;
+\item Execute the command
+\begin{verbatim}              
+        cp ./cases/eg5_obstacle/*.py .
+\end{verbatim}
+followed by 
+\begin{verbatim}              
+        python main.py
+\end{verbatim}
+to create Figure~8.
 \end{itemize}
 
-\subsection{Figures}
+\subsection{Repeatability of Table~1}
+First, we emphasize that due to the issue of input format transformation, we haven't completed the automatic integration of the \textsf{iSat3}\footnote{\url{https://projects.informatik.uni-freiburg.de/projects/isat3/}}
+SMT solver into \textsf{nnbarrier} at the moment, so only training costs in Table~1 will be available for repeatability evaluation. In other words, we are concentrating on the $T_{\textsf{nnbarrier}}$ column in Table~1 of our paper.
+
+set VERBOSE
+
+We have the following remarks on the repeatability of $T_{\textsf{nnbarrier}}$:
+\begin{enumerate}
+    \item a
+    \item b
+\end{enumerate}
+5 different time average
+platform intel
+be patient, random time costs
+
 
 \subsection{Fine-Tuning Figure and Table}
-
+to be completed!
 
 \section{Input Formats}
 % \begin{python}
@@ -219,7 +258,7 @@ Lines
 are to output the measured time costs; 
 Line
 \inputpython{../main.py}{40}{40}
-is to save the trained NN model to a file named \textsf{pre-trained.pt} for later use, which will be talked about in the next section;
+is to save the trained NN model to a file named \textsf{pre-trained.pt} for later use, which has been talked about in the previous section;
 Lines
 \inputpython{../main.py}{9}{9}
 and
@@ -289,7 +328,9 @@ besides, we have similar lines for generating training data from the unsafe and
 domain regions respectively, thus finishing the specification of super-parameters for NN training.
 
 \subsection{User-defined inputs}
-
+If you have your own safety verification problem for a constrained continuous system, and would like to solve it using \textsf{nnbarrier}, what
+you need to do is just rewriting \textsf{prob.py} and \textsf{superp.py} to formulate your problem and set the super-parameters for NN training, following
+the above explanations.
 
 \bibliographystyle{splncs04}
 \bibliography{instruction}

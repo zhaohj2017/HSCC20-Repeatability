@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import superp
 import train
-import plot
+import plot # comment this line if matplotlib, mayavi, or PyQt5 was not successfully installed
 import ann
 import data
 import time
@@ -40,4 +40,4 @@ print("Training totally cost:", time_end_train - time_start_train)
 torch.save(model.state_dict(), 'pre-trained.pt')
 
 # plot
-plot.plot_barrier(model)
+plot.plot_barrier(model) # comment this line if matplotlib, mayavi, or PyQt5 was not successfully installed

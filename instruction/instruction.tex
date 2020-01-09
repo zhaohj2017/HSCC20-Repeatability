@@ -175,10 +175,33 @@ as presented in our paper.
     \caption{The training process showing the number of restarts, epochs, batches, current gradient, and the current loss} \label{fig:train-process}
 \end{figure}
 
-\section{Sample Inputs}
-Here we explain more details about the source files, focusing on \textsf{main.py}, and \textsf{prob.py} and \textsf{superp.py} from the sub-folder
-{\color{blue}\textsf{eg1\_prajna\_original}} of Example~1. You may skip this and go directly to the next
-section for repeatability evaluation, but going through the core codes quickly may enable modifications or extensions of
+\section{Repeatability Evaluation}
+
+5 cases, figures, tables
+
+\subsection{Tables}
+
+\begin{itemize}
+    \item What elements of the paper are included in the REP (e.g.: specific figures, tables, etc.).
+    \item Instructions for installing and running the software and extracting the corresponding results. 
+\end{itemize}
+
+\subsection{Figures}
+
+\subsection{Fine-Tuning Figure and Table}
+
+
+\section{Input Formats}
+% \begin{python}
+%     if i==0:
+%         abc
+%     else:
+%         def
+% \end{python}
+% python3: --version \pyth{__init__}
+
+In this section we explain more details about the source files, focusing on \textsf{main.py}, and \textsf{prob.py} and \textsf{superp.py} from the sub-folder
+{\color{blue}\textsf{eg1\_prajna\_original}} of Example~1. Going through the core codes quickly may enable modifications or extensions of
 the reported case studies in our paper.
 
 \subsection{\textsf{main.py}}
@@ -193,7 +216,11 @@ Lines
 are to train the NN model on the generated training data and measure the time cost;
 Lines
 \inputpython{../main.py}{36}{37}
-are to output the measured time costs; Lines
+are to output the measured time costs; 
+Line
+\inputpython{../main.py}{40}{40}
+is to save the trained NN model to a file named \textsf{pre-trained.pt} for later use, which will be talked about in the next section;
+Lines
 \inputpython{../main.py}{9}{9}
 and
 \inputpython{../main.py}{44}{44}
@@ -226,7 +253,11 @@ safety verification problem in Example~1.
 \subsection{\textsf{superp.py}}
 Line
 \inputpython{../cases/eg1_prajna_original/superp.py}{15}{15}
-is to set the \textsf{VERBOSE} option to 1 so the training information will be displayed as shown in Fig.~\ref{fig:train-process};
+is to set the \textsf{\small VERBOSE} option to 1 so the training information will be displayed as shown in Fig.~\ref{fig:train-process};
+Line
+\inputpython{../cases/eg1_prajna_original/superp.py}{17}{17}
+is to set the \textsf{\small FINE\_TUNE} option to indicate whether we are training a pre-trained NN model,
+extracted from the \textsf{pre-trained.pt} file saved on disk.
 Lines
 \inputpython{../cases/eg1_prajna_original/superp.py}{22}{23}
 are to set the number of hidden layers and the number of neurons of each layer in the generated NN model (here we assume that
@@ -259,30 +290,6 @@ domain regions respectively, thus finishing the specification of super-parameter
 
 \subsection{User-defined inputs}
 
-
-
-% \begin{python}
-%     if i==0:
-%         abc
-%     else:
-%         def
-% \end{python}
-% python3: --version \pyth{__init__}
-
-\section{Repeatability Evaluation}
-
-5 cases, figures, tables
-
-\subsection{Tables}
-
-\begin{itemize}
-    \item What elements of the paper are included in the REP (e.g.: specific figures, tables, etc.).
-    \item Instructions for installing and running the software and extracting the corresponding results. 
-\end{itemize}
-
-\subsection{Figures}
-
-\subsection{Fine-Tuning Figure and Table}
 
 \bibliographystyle{splncs04}
 \bibliography{instruction}

@@ -215,6 +215,7 @@ to create Figure~8.
 First, we emphasize that due to the issue of input format transformation, we haven't completed the automatic integration of the \textsf{iSat3}\footnote{\url{https://projects.informatik.uni-freiburg.de/projects/isat3/}}
 SMT solver into \textsf{nnbarrier} at the moment, so only training costs in Table~1 will be available for repeatability evaluation. In other words, we are concentrating on the $T_{\textsf{\tiny nnbarrier}}$ column in Table~1 of our paper.
 
+Suppose you are using Linux or Mac and have changed into the directory \textsf{HSCC20-Repeatability}.
 For repeatability of $T_{\textsf{\tiny nnbarrier}}$, first of all, 
 set the \textsf{\small VERBOSE} option to 0 in the {\textsf{superp.py}} file in all the 5 sub-folders of {\color{blue}cases}: \pyth{VERBOSE = 0}
 Then execute the command
@@ -253,7 +254,39 @@ We have the following remarks on the repeatability of $T_{\textsf{\tiny nnbarrie
 \end{enumerate}
 
 \subsection{Repeatability of Figure~6}
-to be completed!
+Suppose you are using Linux or Mac and have changed into the directory \textsf{HSCC20-Repeatability}. 
+\subsubsection{Pre-train.} First, execute the command
+\begin{verbatim}              
+        cp ./cases/eg1_prajna_original/*.py .
+\end{verbatim}
+Next modify the following 3 lines in \textsf{superp.py} in the current directory
+\inputpython{../cases/eg1_prajna_original/superp.py}{33}{35}
+to set all the three tolerances to 0.
+Then run 
+\begin{verbatim}              
+        python main.py
+\end{verbatim}
+to obtain a generated barrier certificate and a pre-trained model which will be store in the 
+\textsf{pre-trained.pt} file in the current directory. At the same time, a picture similar to
+the left part of Figure~6 will be produced.
+
+\subsubsection{Fine-tune.}
+In the following, modify the {\textsf{superp.py}} file in the 
+current directory
+\inputpython{../cases/eg1_prajna_original/superp.py}{17}{17}
+by setting the \textsf{\small FINE\_TUNE} option to 1. Next 
+modify the following 3 lines in \textsf{superp.py} in the current directory
+\inputpython{../superp.py}{33}{35}
+to set the three tolerances to larger values, say, \pyth{TOL_SAFE = 0.05}. Then run 
+\begin{verbatim}              
+        python main.py
+\end{verbatim}
+again to obtain a generated barrier certificate and a fine-tuned model which will be store in the 
+\textsf{pre-trained.pt} file in the current directory. At the same time, a picture similar to
+the right part of Figure~6 will be produced.
+
+The above fine-tuning operations can be iteratively performed.
+
 
 \section{Input Formats}
 % \begin{python}

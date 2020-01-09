@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
 import superp
-import train
-import plot # comment this line if matplotlib, mayavi, or PyQt5 was not successfully installed
 import ann
 import data
+import train
 import time
+import plot # comment this line if matplotlib, mayavi, or PyQt5 was not successfully installed
 
 ############################################
 # set default data type to double
@@ -14,7 +14,6 @@ torch.set_default_dtype(torch.float64)
 torch.set_default_tensor_type(torch.DoubleTensor)
 # torch.set_default_dtype(torch.float32)
 # torch.set_default_tensor_type(torch.FloatTensor)
-
 
 # generating training model
 model = ann.gen_nn()

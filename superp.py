@@ -31,7 +31,7 @@ BENT_DEG = 0.0001
 # set loss function definition
 ############################################
 TOL_INIT = 0.0
-TOL_SAFE = 0.05
+TOL_SAFE = 0.0
 TOL_LIE = 0.0
 TOL_BOUNDARY = 0.05
 

@@ -213,21 +213,29 @@ to create Figure~8.
 
 \subsection{Repeatability of Table~1}
 First, we emphasize that due to the issue of input format transformation, we haven't completed the automatic integration of the \textsf{iSat3}\footnote{\url{https://projects.informatik.uni-freiburg.de/projects/isat3/}}
-SMT solver into \textsf{nnbarrier} at the moment, so only training costs in Table~1 will be available for repeatability evaluation. In other words, we are concentrating on the $T_{\textsf{nnbarrier}}$ column in Table~1 of our paper.
+SMT solver into \textsf{nnbarrier} at the moment, so only training costs in Table~1 will be available for repeatability evaluation. In other words, we are concentrating on the $T_{\textsf{\tiny nnbarrier}}$ column in Table~1 of our paper.
 
-set VERBOSE
+For repeatability of $T_{\textsf{\tiny nnbarrier}}$, first of all, 
+set the \textsf{\small VERBOSE} option to 0 in the {\textsf{superp.py}} file in all the 5 sub-folders of {\color{blue}cases}: \pyth{VERBOSE = 0}
+Then execute the command
+\begin{verbatim}              
+        cp ./cases/<sub-folder-name>/*.py .
+\end{verbatim}
+followed by 
+\begin{verbatim}              
+        python main.py
+\end{verbatim}
+repeatedly with \verb|<sub-folder-name>| replaced by the names of the 5 sub-folders in {\color{blue}cases}.
 
-We have the following remarks on the repeatability of $T_{\textsf{nnbarrier}}$:
+We have the following remarks on the repeatability of $T_{\textsf{\tiny nnbarrier}}$:
 \begin{enumerate}
-    \item a
-    \item b
+    \item The time costs reported in the paper are obtained on the platform running Ubuntu~18.04.02 with Intel i7-8550u
+            CPU and 32GB memory; the installed packages are \textsf{\small Python~3.6.7} and \textsf{\small Pytorch~1.2.0};
+    \item The time costs reported in the paper are averaged over 5 separate runs for all 5 examples:
+    \item random, be patient
 \end{enumerate}
-5 different time average
-platform intel
-be patient, random time costs
 
-
-\subsection{Fine-Tuning Figure and Table}
+\subsection{Repeatability of Figure~6}
 to be completed!
 
 \section{Input Formats}

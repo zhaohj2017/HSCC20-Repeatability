@@ -121,24 +121,61 @@ In summary, we have tested \textsf{nnbarrier} using the following combinations
 \end{table}
 
 \subsection{Obtain the \textsf{nnbarrier} Package}
-Suppose that you have \textsf{Git} install on your system. Then the \textsf{nnbarrier} package can be obtained via
+Suppose that you have \textsf{Git} installed on your system. Then the \textsf{nnbarrier} package can be obtained via
 \begin{verbatim}              
     git clone https://github.com/zhaohj2017/HSCC20-Repeatability
 \end{verbatim}
-It consists of 10 \textsf{Python} source files and one file folder as listed below:
+
+\subsubsection{Sturcture of the Package.}
+The cloned directory \textsf{HSCC20-Repeatability} consists of 10 \textsf{Python} source files and one file folder as listed below:
 \begin{itemize}
-    \item[-] \textsf{acti.py}: 
-    \item[-] \textsf{ann.py}: 
-    \item[-] \textsf{data.py}: 
-    \item[-] \textsf{loss.py}: 
-    \item[-] \textsf{lrate.py}: 
-    \item[-] \textsf{main.py}: 
-    \item[-] \textsf{opt.py}:  
-    \item[-] \textsf{plot.py}: 
-    \item[-] \textsf{plot3d.py}: 
-    \item[-] \textsf{train.py} 
-    \item[-] {\color{blue}\textsf{cases}}: a file folder consisting of all the problem definitions in our paper
+    \item[-] \textsf{acti.py}: self-defined activation functions (i.e. \emph{Bent-ReLU}) for neural networks
+    \item[-] \textsf{ann.py}: generating a multi-layer neural network model (NN for short)
+    \item[-] \textsf{data.py}: generating batches of training data
+    \item[-] \textsf{loss.py}: given a NN and a training data set, computes a loss value
+    \item[-] \textsf{lrate.py}: self-defined learning rate adjusting strategy
+    \item[-] \textsf{main.py}: the main file to run
+    \item[-] \textsf{opt.py}: a set of optimizers provided by \textsf{Pytorch} to train the neural network
+    \item[-] \textsf{plot.py}: visualization of 2D systems
+    \item[-] \textsf{plot3d.py}: visualization of 3D systems
+    \item[-] \textsf{train.py}: the training loop that iterates through batches, epochs, and restarts
+    \item[-] {\color{blue}\textsf{cases}}: a file folder consisting of all the problem definitions for the case studies in our paper
 \end{itemize}
+Inside {\color{blue}\textsf{cases}}, there are 5 sub-folders corresponding to the examples in the paper:
+\begin{itemize}
+    \item[-] {\color{blue}\textsf{eg1\_prajna\_original}}: the classical problem from \cite{Prajna04safetyverification}, corresponding to the running example 
+    Example~1 and its continuations in our paper
+    \item[-] {\color{blue}\textsf{eg2\_prajna\_modified}}: modified version of the problem from \cite{Prajna04safetyverification}, corresponding to Example~2 in our paper 
+    \item[-] {\color{blue}\textsf{eg3\_darboux}}: the \emph{Darboux-type} barrier certificate problem from \cite{Zeng2016}, corresponding to Example~3 in our paper
+    \item[-] {\color{blue}\textsf{eg4\_exponential}}: the \emph{exponential} barrier certificate problem from \cite{HengjunZhaoFM2015}, corresponding to Example~4
+                in our paper 
+    \item[-] {\color{blue}\textsf{eg5\_obstacle}}: the aircraft obstacle avoidance problem modified from \cite{BarryICRA2012}, corresponding to Example~5 in our paper
+\end{itemize}
+Each of the 5 sub-folders consists of 2 Python source files with the same names but different contents:
+\begin{itemize}
+    \item {\color{purple}\textsf{prob.py}}: specify the safety verification problem of the corresponding example
+    \item {\color{purple}\textsf{superp.py}}: specify the super-parameters for training the neural network of the corresponding problem
+\end{itemize}
+These are the two files that needs modification for solving user-defined problems.
+
+\subsubsection{Test \textsf{nnbarrier}.} Suppose you are using Linux or Mac and located in the \textsf{HSCC20-Repeatability}. Execute the command
+\begin{verbatim}              
+        cp ./cases/eg1_prajna_original/*.py .
+\end{verbatim}
+to copy the problem definition and parameter specification files to current directory. Then \textsf{nnbarrier} can be invoked by executing
+\begin{verbatim}              
+        python main.py
+\end{verbatim}
+where \textsf{python} can actually be \textsf{python3} on your platform. If all the packages aforementioned are correctly 
+installed, then the training process starts (see Fig.~\ref{fig:train-process}). Upon termination you will see a popup window illustrating the plotted barrier certificate,
+as presented in our paper.
+\begin{figure}[t]
+    \includegraphics[width=\textwidth]{./fig/training-process}
+    \caption{The training process showing the number of restarts, epochs, batches, current gradient, and the current loss} \label{fig:train-process}
+\end{figure}
+
+
+
 
 \section{Sample Input}
 
@@ -174,16 +211,6 @@ python3: --version \pyth{__init__}
 
 \subsection{A Subsection Sample}
 
-Please \cite{Prajna04safetyverification} try \cite{BarryICRA2012} avoid rasterized images for line-art diagrams and
-schemas. Whenever possible, use vector graphics instead (see
-Fig.~\ref{fig1}).
-
-\begin{figure}
-\includegraphics[width=\textwidth]{./fig/batch_data}
-\caption{A figure caption is always placed below the illustration.
-Please note that short captions are centered, while long ones are
-justified by the macro package automatically.} \label{fig1}
-\end{figure}
 
 \bibliographystyle{splncs04}
 \bibliography{instruction}

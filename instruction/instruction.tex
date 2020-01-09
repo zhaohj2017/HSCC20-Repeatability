@@ -43,7 +43,7 @@
     backgroundcolor=\color{backcolor},  %列表背景色
     tabsize=4,                          %制表符长度为4个字符
     gobble=4                            %忽略每行代码前4个字符
-    }
+}
 
 \begin{document}
 %
@@ -109,7 +109,8 @@ will be explained later.
 In summary, we have tested \textsf{nnbarrier} using the following combinations
 \begin{table}
     \centering
-	\caption{Tested platforms and packages for \textsf{nnbarrier}}\label{tbl:platform}
+    \caption{Tested platforms and packages for \textsf{nnbarrier}}
+    \label{tbl:platform}
 	\begin{tabular}{|c|c|c|c|c|c|c|} 
 		\hline OS                 & Python    & Pip      & Pytorch & Visualization \\ 
 		\hline Ubuntu~18.04.02    & 3.6.7     & 9.0.1    & 1.2.0   & \textsf{matplotlib+mayavi+PyQt5}  \\ 
@@ -175,17 +176,19 @@ as presented in our paper.
 \end{figure}
 
 
-
-
 \section{Sample Input}
+Here we explain more about the three source files \textsf{main.py}, \textsf{prob.py}, and \textsf{superp.py} using 
+Example~1.
 
-comment some lines
+\subsection{\textsf{main.py}}
 
+\subsection{\textsf{prob.py}}
+
+\subsection{\textsf{superp.py}}
+
+\subsection{User-defined inputs}
 
 \inputpython{../ann.py}{2}{5}
-
-
-
 
 \begin{python}
     if i==0:
@@ -195,22 +198,20 @@ comment some lines
 \end{python}
 python3: --version \pyth{__init__}
 
+\section{Repeatability Evaluation}
 
+5 cases, figures, tables
 
-
-\section{Cases in the Paper}
+\subsection{Tables}
 
 \begin{itemize}
     \item What elements of the paper are included in the REP (e.g.: specific figures, tables, etc.).
     \item Instructions for installing and running the software and extracting the corresponding results. 
 \end{itemize}
 
-\section{Define Your Own Problem}
+\subsection{Figures}
 
-\section{Fine-Tuning}
-
-\subsection{A Subsection Sample}
-
+\subsection{Fine-Tuning Figure and Table}
 
 \bibliographystyle{splncs04}
 \bibliography{instruction}

@@ -100,7 +100,6 @@ DATA_LEN_D = np.power(2, DATA_EXP_D) # the number of samples for each dimension 
 BLOCK_EXP_D = np.array([6, 6]) # 0 <= BATCH_EXP <= DATA_EXP
 BLOCK_LEN_D = np.power(2, BLOCK_EXP_D) # number of batches for each dimension
 
-
 ############################################
 # number of mini_batches
 ############################################
@@ -109,7 +108,6 @@ BATCHES_U = reduce(mul, list(BLOCK_LEN_U))
 BATCHES_D = reduce(mul, list(BLOCK_LEN_D))
 
 BATCHES = max(BATCHES_I, BATCHES_U, BATCHES_D)
-
 
 ############################################
 # for plotting

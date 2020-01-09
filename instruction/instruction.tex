@@ -26,7 +26,7 @@
 \usepackage{listings}
 \lstset{                        %高亮代码设置
     language=python,                    %Python语法高亮
-    linewidth=0.9\linewidth,            %列表list宽度
+    linewidth=1\linewidth,            %列表list宽度
     %basicstyle=\ttfamily,              %tt无法显示空格
     commentstyle=\color{commentcolor},  %注释颜色
     keywordstyle=\color{keywordcolor},  %关键词颜色
@@ -159,7 +159,7 @@ Each of the 5 sub-folders consists of 2 Python source files with the same names 
 \end{itemize}
 These are the two files that needs modification for solving user-defined problems.
 
-\subsubsection{Test \textsf{nnbarrier}.} Suppose you are using Linux or Mac and located in the \textsf{HSCC20-Repeatability}. Execute the command
+\subsubsection{Test \textsf{nnbarrier}.} Suppose you are using Linux or Mac and located in the \textsf{HSCC20-Repeatability} directory. Execute the command
 \begin{verbatim}              
         cp ./cases/eg1_prajna_original/*.py .
 \end{verbatim}
@@ -175,17 +175,53 @@ as presented in our paper.
     \caption{The training process showing the number of restarts, epochs, batches, current gradient, and the current loss} \label{fig:train-process}
 \end{figure}
 
-
 \section{Sample Inputs}
-Here we explain more about the three source files \textsf{main.py}, \textsf{prob.py}, and \textsf{superp.py} using 
-Example~1.
+Here we explain more details about the source files, focusing on \textsf{main.py}, and \textsf{prob.py} and \textsf{superp.py} from the sub-folder
+{\color{blue}\textsf{eg1\_prajna\_original}} of Example~1. You may skip this and go directly to the next
+section for repeatability evaluation, but going through the core codes quickly may enable modifications or extensions of
+the reported case studies in our paper.
 
 \subsection{\textsf{main.py}}
-
+Line 
+\inputpython{../main.py}{20}{20}
+is to build a NN model, the number of layers, neurons, and the type of activation functions of which are specified in \textsf{superp.ty};
+Lines
+\inputpython{../main.py}{27}{29}
+is to generate batches of training data and measure the time cost; 
+Lines
+\inputpython{../main.py}{32}{34}
+are to train the NN model on the generated training data and measure the time cost;
+Lines
+\inputpython{../main.py}{36}{37}
+are to output the measured time costs; Lines
 \inputpython{../main.py}{9}{9}
+and
 \inputpython{../main.py}{44}{44}
+are for visualization of the generated barrier certificates, which should be \emph{commented} if you
+failed to install the required graphics packages successfully.
 
 \subsection{\textsf{prob.py}}
+Line
+\inputpython{../cases/eg1_prajna_original/prob.py}{15}{15}
+is to set the dimension of the considered system; Lines
+\inputpython{../cases/eg1_prajna_original/prob.py}{21}{24}
+are to set the interval ranges and the real shape of the initial set, where 1 denotes (super-)rectangle and 
+2 denotes circle or sphere; Lines
+\inputpython{../cases/eg1_prajna_original/prob.py}{30}{33}
+and lines
+\inputpython{../cases/eg1_prajna_original/prob.py}{39}{42}
+are to set the interval ranges and shapes for the unsafe region and the domain of the system, respectively;
+Line 
+\inputpython{../cases/eg1_prajna_original/prob.py}{49}{52}
+is to set the inequality constraint representing the circle region of the initial set; Lines
+\inputpython{../cases/eg1_prajna_original/prob.py}{55}{55}
+and 
+\inputpython{../cases/eg1_prajna_original/prob.py}{59}{59}
+are defining the inequality constraints representing the unsafe and domain areas, respectively;
+Lines
+\inputpython{../cases/eg1_prajna_original/prob.py}{67}{81}
+are defining the continuous dynamics of the considered system, thus finishing the formulation of the
+safety verification problem in Example~1.
 
 \subsection{\textsf{superp.py}}
 
@@ -193,13 +229,13 @@ Example~1.
 
 
 
-\begin{python}
-    if i==0:
-        abc
-    else:
-        def
-\end{python}
-python3: --version \pyth{__init__}
+% \begin{python}
+%     if i==0:
+%         abc
+%     else:
+%         def
+% \end{python}
+% python3: --version \pyth{__init__}
 
 \section{Repeatability Evaluation}
 

@@ -33,8 +33,8 @@ time_start_train = time.time()
 train.itr_train(model, batches_init, batches_unsafe, batches_domain) 
 time_end_train = time.time()
 
-print("\nData generation totally cost:", time_end_data - time_start_data)
-print("Training totally cost:", time_end_train - time_start_train)
+print("\nData generation totally costs:", time_end_data - time_start_data)
+print("Training totally costs:", time_end_train - time_start_train)
 
 # save model
 torch.save(model.state_dict(), 'pre-trained.pt')

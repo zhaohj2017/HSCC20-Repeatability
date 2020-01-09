@@ -224,6 +224,38 @@ are defining the continuous dynamics of the considered system, thus finishing th
 safety verification problem in Example~1.
 
 \subsection{\textsf{superp.py}}
+Line
+\inputpython{../cases/eg1_prajna_original/superp.py}{15}{15}
+is to set the \textsf{VERBOSE} option to 1 so the training information will be displayed as shown in Fig.~\ref{fig:train-process};
+Lines
+\inputpython{../cases/eg1_prajna_original/superp.py}{22}{23}
+are to set the number of hidden layers and the number of neurons of each layer in the generated NN model (here we assume that
+the number of neurons are the same in different layers);
+Line
+\inputpython{../cases/eg1_prajna_original/superp.py}{28}{28}
+is to set the constant parameter in our designed \emph{Bent-ReLU} activation functions;
+Lines
+\inputpython{../cases/eg1_prajna_original/superp.py}{33}{36}
+are to set the four tolerances in our designed loss functions;
+Line
+\inputpython{../cases/eg1_prajna_original/superp.py}{63}{63}
+is to set the number of training epochs;
+Lines
+\inputpython{../cases/eg1_prajna_original/superp.py}{69}{71}
+are to setting the parameters of our designed learning rate adjusting strategy;
+Line
+\inputpython{../cases/eg1_prajna_original/superp.py}{77}{77}
+is to set the maximum gradient value for our gradient control strategy;
+Lines
+\inputpython{../cases/eg1_prajna_original/superp.py}{84}{87}
+are to set the number of samples, which is an interger power of 2, for each dimension of the system for training data generation
+from the initial set;
+Lines
+\inputpython{../cases/eg1_prajna_original/superp.py}{88}{91}
+are to set the number of batches, which is an interger power of 2, for each dimension of the system for generating small batches 
+of training data from the initial set; 
+besides, we have similar lines for generating training data from the unsafe and
+domain regions respectively, thus finishing the specification of super-parameters for NN training.
 
 \subsection{User-defined inputs}
 

@@ -19,23 +19,22 @@ FINE_TUNE = 0 # set to 1 for fine-tuning a pre-trained model
 ############################################
 # set the network architecture
 ############################################
-D_H = 5 # the number of neurons of each hidden layer
 N_H = 1 # then number of hidden layers
-
+D_H = 5 # the number of neurons of each hidden layer
 
 ############################################
 # for activation function definition
 ############################################
 BENT_DEG = 0.0001
 
-
 ############################################
 # set loss function definition
 ############################################
 TOL_INIT = 0.02
 TOL_SAFE = 0.02
-TOL_BOUNDARY = 0.05
 TOL_LIE = 0.01
+TOL_BOUNDARY = 0.05
+
 TOL_NORM_LIE = 0
 WEIGHT_LIE = 1
 WEIGHT_NORM_LIE = 0
@@ -43,7 +42,6 @@ WEIGHT_NORM_LIE = 0
 DECAY_LIE = 1
 DECAY_INIT = 1
 DECAY_UNSAFE = 1
-
 
 ############################################
 # for optimization method tunning: LBFGS
@@ -54,18 +52,15 @@ LBFGS_TOL_CHANGE = 1e-09
 LBFGS_NUM_HISTORY = 100
 LBFGS_LINE_SEARCH_FUN = None
 
-
 TOL_OPTIMIZER_RESET = -1
 SHRINK_RATE_FACTOR = 2
 FRACTION_INSTABLE_BATCH = 1000000000000000000000
 NUM_BATCH_ITR = 5
 
-
 ############################################
 # number of training epochs
 ############################################
 EPOCHS = 10
-
 
 ############################################
 # my own scheduling policy: 
@@ -75,23 +70,25 @@ ALPHA = 0.1 # initial learning rate
 BETA = 0 # if beta equals 0 then constant rate = alpha
 GAMMA = 0 # when beta is nonzero, larger gamma gives faster drop of rate
 
-
 ############################################
 # training termination flags
 ############################################
 LOSS_OPT_FLAG = 1e-16
 TOL_MAX_GRAD = 6
 
-
 ############################################
 # for training set generation
 ############################################
 TOL_DATA_GEN = 1e-16
 
-DATA_EXP_I = np.array([5, 5]) # for sampling from initial; length = prob.DIM
-DATA_LEN_I = np.power(2, DATA_EXP_I) # the number of samples for each dimension of domain
-BLOCK_EXP_I = np.array([3, 3]) # 0 <= BATCH_EXP <= DATA_EXP
-BLOCK_LEN_I = np.power(2, BLOCK_EXP_I) # number of batches for each dimension
+DATA_EXP_I = np.array([5, 5]) 
+    # for sampling from initial; length = prob.DIM
+DATA_LEN_I = np.power(2, DATA_EXP_I) 
+    # the number of samples for each dimension of domain
+BLOCK_EXP_I = np.array([3, 3]) 
+    # 0 <= BATCH_EXP <= DATA_EXP
+BLOCK_LEN_I = np.power(2, BLOCK_EXP_I) 
+    # number of batches for each dimension
 
 DATA_EXP_U = np.array([5, 5]) # for sampling from initial; length = prob.DIM
 DATA_LEN_U = np.power(2, DATA_EXP_U) # the number of samples for each dimension of domain

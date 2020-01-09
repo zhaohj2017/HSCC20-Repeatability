@@ -235,17 +235,21 @@ We have the following remarks on the repeatability of $T_{\textsf{\tiny nnbarrie
     \begin{table}
         \centering
         \caption{Training time costs (in \textsf{seconds}) over 5 runs for Examples~2-5}
-        \label{tbl:platform}
+        \label{tbl:time-cost}
         \begin{tabular}{|c|c|c|c|c|c|c|} 
-            \hline                  & Run~1     & Run~2     & Run~3   & Run~4 & Run~5 & Average \\ 
-            \hline Example~2        & 3.6.7     & 9.0.1     & 1.2.0   &       &       &  \\ 
-            \hline Example~3        & 3.6.9     & 19.3.1    & 1.3.1   &       &       &     \\ 
-            \hline Example~4        & 3.7.3     & 19.3.1    & 1.3.1   &       &       &  \\
-            \hline Example~5        & 3.7.6     & 19.3.1    & 1.3.1   &       &       &   \\ 
+            \hline                  & Run~1     & Run~2     & Run~3   & Run~4   & Run~5       & Average \\ 
+            \hline Example~2        & 3252.37   & 540.90    & 287.36  & 3653.01 & 921.61      & 1731.03  \\ 
+            \hline Example~3        & 14.22     & 776.57    & 34.99   & 13.38   & 868.09      & 341.45    \\ 
+            \hline Example~4        & 234.65    & 1340.01   & 314.03  & 1249.72 & 49.00       & 637.48 \\
+            \hline Example~5        & 1527.77   & 7254.64   & 1083.90 & 487.04  & 5473.04     & 3165.28  \\ 
             \hline
         \end{tabular}
     \end{table}
-    \item random, be patient
+    \item It can be seen from Table~\ref{tbl:time-cost} that the time costs of different runs for the same example varies significantly. It is 
+    a reasonable phenomenon since the weights and biases of a NN are randomly initialized. Such randomization makes the exact repeatability of
+    the reported time costs impossible. However, we believe that the averaged time costs give the expected length of time you need to wait before
+    a result can be returned. Anyway, in all our tests, the training process for all examples will terminate within 5 restarts. So please
+    pay a little patience if you cannot obtain a result immediately when you run \textsf{nnbarrier}.
 \end{enumerate}
 
 \subsection{Repeatability of Figure~6}

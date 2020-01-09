@@ -75,22 +75,62 @@ sample inputs, and user-defined inputs. We will emphasize what parts that were p
 evaluation. If there is any problem in using \textsf{nnbarrier}, please contact \email{zhaohj2016@swu.edu.cn}.
 
 \section{Installation}
-\begin{itemize}
-\item What elements of the paper are included in the REP (e.g.: specific figures, tables, etc.).
-\item The system requirements for running the REP (e.g.: OS, compilers, environments, etc.).
-\item Instructions for installing and running the software and extracting the corresponding results. 
-\end{itemize}
+
+\subsection{System Requirements}
+It is assumed that you have \textsf{Python Version 3.x}  installed on your system.
+We have tested \textsf{nnbarrier} on Ubuntu Linux, Mac OS, and Windows.
+
+\subsection{Dependent Packages}
+It is assumed that you have the python package manager \textsf{Pip} installed for \textsf{Python 3.x}, which will facilitate
+the installation of dependent packages greatly. 
+
+Essentially, to run \textsf{nnbarrier} without visualization, the only two packages you need to install are \textsf{Pytorch} and \textsf{NumPy}.
+It seems that \textsf{numpy} will be automatically installed when installing \textsf{Pytorch}. Please visit \url{https://pytorch.org/} for the 
+installation instructions
+for the popular machine learning platform \textsf{Pytorch}. For example, with the combination 
+\textsf{Mac+Python~3.7+Pip} (without \textsf{cuda} GPU support), the latest stable version \textsf{Pytorch~1.3} can be installed by simply run 
+\begin{verbatim}
+            pip3 install torch torchvision\end{verbatim}
+
+If you would like to visualize the generated barrier function together with the considered system, i.e. the system dynamics, the domain, the initial set, and the unsafe/safe region,
+then some additional graphics packages are required. For visualization of 2D systems, \textsf{matplotlib} needs to be installed, and you are referred to
+ \url{https://matplotlib.org/users/installing.html} for the instructions. In the implementation of \textsf{nnbarrier},
+ visulaization of 3D systems is supported by \textsf{Mayavi}, a 3D scientific data visualization library. Please visit
+ \url{http://docs.enthought.com/mayavi/mayavi/installation.html#installing-with-pip} for the installation of \textsf{mayavi} and 
+ its dependencies (e.g. \textsf{PyQt5}). In our testing, on most platforms the visualization-required packages can be installed with the following commands easily:
+\begin{verbatim}              
+            pip install matplotlib
+            pip install mayavi
+            pip install PyQt5 \end{verbatim}
+where \textsf{pip} can be actually \textsf{pip3}. However, we do met some problems occasionally. If you failed to
+get this done in the end, \textsf{nnbarrier} can still be run by commenting the statements for visualization, which
+will be explained later.  
+
+\subsection{Obtain the \textsf{nnbarrier} Package}
+
+In summary, we have tested \textsf{nnbarrier} using the following combinations
+
+\begin{table}
+    \centering
+	\caption{Tested platforms and packages for \textsf{nnbarrier}}\label{tbl:platform}
+	\label{tab:platform}
+	\begin{tabular}{|c|c|c|c|c|c|c|} 
+		\hline OS                 & Python    & Pip      & Pytorch & Visualization \\ 
+		\hline Ubuntu~TBD         & TBD       & 19.3.1   & TBD     & \\ 
+		\hline Ubuntu~18.04.02    & 3.6.9     & 19.3.1   & 1.3.1   &   \\ 
+		\hline Mac~OS~10.11.6     & 3.7.6     & 19.3.1   & 1.3.1   &  \\ 
+		\hline Windows~10~1903    & 3.7.3     & 19.3.1   & 1.3.1   &  \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\textsf{Ubuntu~18.04.02+Python~3.6.9}, \textsf{Mac~OS~10.11.6+Python~3.7.6}, 
+and \textsf{Windows~10~1903+Python~3.7.3} combinations.
+
+git clone
 
 \begin{itemize}
-    \item hscc2020 hscc20:111111
-    \item ubuntu: 18.04.02 LTS \url{https://ubuntu.com/download/desktop}
-    \item gcc: sudo apt update; sudo apt install build-essential; gcc --version
-    \item python: 3.6.7 python3 --version \pyth{__init__}
-    \item pip3: sudo apt install python3-pip
-    \item git: sudo apt install git
-    \item pytorch 1.3.1 cpu, torchvision 0.4.2 cpu: \url{https://pytorch.org/} \begin{verbatim}pip3 install torch==1.3.1+cpu torchvision==0.4.2+cpu -f 
-    https://download.pytorch.org/whl/torch_stable.html\end{verbatim}
-    \item python package: numpy, matplotlib \url{https://matplotlib.org/} \url{https://matplotlib.org/users/installing.html}
+    \item matplotlib \url{https://matplotlib.org/} 
     \item mayavi \url{http://docs.enthought.com/mayavi/mayavi/} \url{http://docs.enthought.com/mayavi/mayavi/installation.html#installing-with-pip}
     \item PySide2: pip install pyside2
 \end{itemize}
@@ -101,6 +141,13 @@ evaluation. If there is any problem in using \textsf{nnbarrier}, please contact 
     else:
         def
 \end{python}
+python3: --version \pyth{__init__}
+
+\begin{itemize}
+    \item What elements of the paper are included in the REP (e.g.: specific figures, tables, etc.).
+    \item The system requirements for running the REP (e.g.: OS, compilers, environments, etc.).
+    \item Instructions for installing and running the software and extracting the corresponding results. 
+    \end{itemize}
 
 \section{Sample Input}
 

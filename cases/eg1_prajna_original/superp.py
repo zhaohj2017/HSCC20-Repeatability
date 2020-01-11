@@ -19,7 +19,7 @@ FINE_TUNE = 0 # set to 1 for fine-tuning a pre-trained model
 ############################################
 # set the network architecture
 ############################################
-N_H = 1 # then number of hidden layers
+N_H = 1 # the number of hidden layers
 D_H = 5 # the number of neurons of each hidden layer
 
 ############################################
